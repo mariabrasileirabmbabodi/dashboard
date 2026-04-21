@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard RH v7 — Maria Brasileira</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --v:#1B6B3A;--v2:#144d2a;--v3:#0d3319;--am:#F5C400;--la:#F97316;
+  --bg:#0f1f15;--sf:#162b1e;--sf2:#1e3828;--sf3:#243f2f;
+  --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.13);
+  --tx:#f0f4f1;--tx2:#9ab5a3;--tx3:#5a7a65;
+  --pa:#22c55e;--pab:rgba(34,197,94,0.13);
+  --pb:#f59e0b;--pbb:rgba(245,158,11,0.13);
+  --pc:#f97316;--pcb:rgba(249,115,22,0.13);
+  --re:#ef4444;--reb:rgba(239,68,68,0.11);
+  --wa:#25d366;--wab:rgba(37,211,102,0.12);
+  --bl:#3b82f6;--pu:#a78bfa;--pi:#ec4899;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;min-height:100vh}
+
+/* ── LOGIN ── */
+.lov{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:999;display:flex;align-items:center;justify-content:center}
+.lbox{background:var(--sf);border:1px solid var(--bd2);border-radius:18px;padding:36px;width:400px}
+.lbox h2{font-size:18px;font-weight:700;margin-bottom:4px;text-align:center}
+.lbox p{font-size:12px;color:var(--tx3);margin-bottom:20px;text-align:center}
+.lic{width:56px;height:56px;border-radius:16px;background:var(--v);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;margin:0 auto 16px}
+.linp{width:100%;padding:11px 14px;background:var(--sf2);border:1px solid var(--bd2);border-radius:9px;color:var(--tx);font-size:13px;outline:none;font-family:'DM Sans',sans-serif;margin-bottom:10px;transition:border .15s}
+.linp:focus{border-color:var(--v)}
+.lbtn{width:100%;padding:11px;background:var(--v);border:none;border-radius:9px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s;margin-top:4px}
+.lbtn:hover{background:var(--v2)}
+.token-box{background:var(--sf2);border:1px solid var(--am);border-radius:8px;padding:12px;margin:12px 0;text-align:center}
+.token-num{font-size:28px;font-weight:700;letter-spacing:6px;color:var(--am);font-family:'DM Mono',monospace}
+.token-hint{font-size:11px;color:var(--tx3);margin-top:4px}
+.llink{font-size:11px;color:var(--bl);cursor:pointer;text-align:center;display:block;margin-top:10px}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:228px;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;z-index:10;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:3px}.sidebar::-webkit-scrollbar-thumb{background:var(--sf3)}
+.slogo{padding:18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.slic{width:36px;height:36px;border-radius:10px;background:var(--v);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.slgn{font-size:13px;font-weight:600;color:var(--tx)}.slgs{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace}
+.snav{padding:10px;flex:1;display:flex;flex-direction:column;gap:1px}
+.sg{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;padding:8px 10px 4px}
+.si{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;font-size:12px;color:var(--tx2);cursor:pointer;transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+.si:hover{background:var(--sf2);color:var(--tx)}.si.on{background:var(--v);color:#fff}
+.si svg{width:13px;height:13px;flex-shrink:0}
+.si .bc{margin-left:auto;background:var(--la);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px}
+.si.on .bc{background:rgba(255,255,255,0.25)}
+.sfooter{padding:10px;border-top:1px solid var(--bd);flex-shrink:0}
+.uc{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sf2);border-radius:8px;cursor:pointer;margin-bottom:7px}
+.uav{width:30px;height:30px;border-radius:8px;background:var(--v);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.unn{font-size:12px;font-weight:500}.urr{font-size:10px;color:var(--tx3)}
+.syncb{width:100%;padding:8px;background:var(--sf2);border:1px solid var(--bd2);border-radius:7px;color:var(--tx2);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:'DM Sans',sans-serif;transition:all .15s}
+.syncb:hover{background:var(--v);color:#fff}.syncb svg{width:12px;height:12px}
+
+/* ── MAIN ── */
+.main{margin-left:228px;min-height:100vh;display:flex;flex-direction:column}
+.fbar{padding:10px 22px;border-bottom:1px solid var(--bd);background:var(--sf);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.fbar-title{font-size:14px;font-weight:600;margin-right:6px;flex-shrink:0}
+.fsel{background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:5px 9px;color:var(--tx2);font-size:11px;outline:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.fsel:focus{border-color:var(--v)}
+.sbox{display:flex;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:5px 10px}
+.sbox:focus-within{border-color:var(--v)}
+.sbox input{background:none;border:none;outline:none;color:var(--tx);font-size:11px;width:140px;font-family:'DM Sans',sans-serif}
+.sbox input::placeholder{color:var(--tx3)}.sbox svg{width:11px;height:11px;fill:var(--tx3);flex-shrink:0}
+.freset{padding:5px 10px;background:transparent;border:1px solid var(--bd2);border-radius:7px;color:var(--tx3);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.finfo{font-size:10px;color:var(--tx3);margin-left:auto;font-family:'DM Mono',monospace;white-space:nowrap}
+.content{padding:18px 22px;flex:1}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.mc{background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:13px 15px}
+.mcl{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.mcv{font-size:24px;font-weight:700;line-height:1;margin-bottom:3px}
+.mcs{font-size:10px;color:var(--tx3)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.panel{background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:15px}
+.pt{font-size:12px;font-weight:600;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px}
+.pt span{font-size:10px;color:var(--tx3);font-weight:400;font-family:'DM Mono',monospace}
+.ch{position:relative;height:190px}
+.chlg{position:relative;height:230px}
+.chsm{position:relative;height:150px}
+
+/* ── TABLE ── */
+.tpanel{background:var(--sf);border:1px solid var(--bd);border-radius:11px;overflow:hidden;margin-bottom:16px}
+.tbar{padding:11px 15px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.tbar h2{font-size:12px;font-weight:600}
+.tscroll{overflow-x:auto;max-height:380px;overflow-y:auto}
+.tscroll::-webkit-scrollbar{width:3px;height:3px}.tscroll::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:3px}
+table{width:100%;border-collapse:collapse}
+th{padding:7px 11px;text-align:left;font-size:9px;color:var(--tx3);font-weight:500;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd);background:var(--sf2);white-space:nowrap;position:sticky;top:0;z-index:1}
+td{padding:9px 11px;font-size:11px;border-bottom:1px solid var(--bd);vertical-align:middle;color:var(--tx)}
+tr:last-child td{border-bottom:none}tr:hover td{background:var(--sf2)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:99px;font-size:9px;font-weight:600;white-space:nowrap}
+.ba{background:var(--pab);color:var(--pa)}.bb{background:var(--pbb);color:var(--pb)}.bc{background:var(--pcb);color:var(--pc)}
+.bn{background:rgba(99,179,237,0.12);color:#63b3ed}
+.bco{background:var(--pbb);color:var(--pb)}
+.bnc{background:rgba(239,68,68,0.15);color:#fca5a5}
+.be{background:rgba(167,139,250,0.12);color:var(--pu)}
+.bnf{background:rgba(107,114,128,0.2);color:#9ca3af}
+.bnt{background:rgba(251,146,60,0.15);color:#fb923c}
+.bap{background:var(--pab);color:var(--pa)}
+.brp{background:var(--reb);color:var(--re)}
+
+/* ── BUTTONS ── */
+.ini{width:28px;height:28px;border-radius:7px;background:var(--v2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--am);flex-shrink:0}
+.wb{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:var(--wab);border:1px solid rgba(37,211,102,0.25);color:var(--wa);cursor:pointer;flex-shrink:0;transition:all .15s}
+.wb:hover{background:var(--wa);color:#fff}.wb svg{width:12px;height:12px;fill:currentColor}
+.vbtn{background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:4px 9px;color:var(--tx2);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.vbtn:hover{color:var(--tx);background:var(--sf3)}
+.gbtn{background:var(--v);border:none;border-radius:6px;padding:5px 12px;color:#fff;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
+.gbtn:hover{background:var(--v2)}
+.rbtn{background:var(--reb);border:none;border-radius:6px;padding:5px 12px;color:var(--re);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.pbtn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(245,196,0,0.1);border:1px solid rgba(245,196,0,0.25);color:var(--am);cursor:pointer;font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .15s}
+.pbtn:hover{background:var(--am);color:#1a1a1a}.pbtn svg{width:11px;height:11px;stroke:currentColor;fill:none;flex-shrink:0}
+.wbf{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:var(--wab);border:1px solid rgba(37,211,102,0.25);color:var(--wa);cursor:pointer;font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .15s}
+.wbf:hover{background:var(--wa);color:#fff}.wbf svg{width:11px;height:11px;fill:currentColor;flex-shrink:0}
+.blubtn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);color:var(--bl);cursor:pointer;font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif}
+.blubtn:hover{background:var(--bl);color:#fff}.blubtn svg{width:11px;height:11px;stroke:currentColor;fill:none}
+.pupbtn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.25);color:var(--pu);cursor:pointer;font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif}
+.pupbtn:hover{background:var(--pu);color:#fff}.pupbtn svg{width:11px;height:11px;stroke:currentColor;fill:none}
+
+/* ── SSEL ── */
+.ssel{border:none;outline:none;font-size:9px;font-family:'DM Sans',sans-serif;cursor:pointer;padding:2px 7px;border-radius:99px;font-weight:600;max-width:130px}
+
+/* ── TAG ── */
+.tag{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:var(--sf3);color:var(--tx2);margin:1px}
+
+/* ── DIAS NO STATUS ── */
+.dsb{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:99px;font-size:9px;font-weight:600}
+.dsb-ok{background:rgba(34,197,94,0.12);color:var(--pa)}
+.dsb-warn{background:rgba(245,158,11,0.15);color:var(--pb)}
+.dsb-alert{background:rgba(239,68,68,0.15);color:var(--re)}
+
+/* ── PRODUÇÃO ── */
+.pcard{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:13px;margin-bottom:8px}
+.pchd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pcav{width:36px;height:36px;border-radius:10px;background:var(--v);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.pcn{font-size:13px;font-weight:600}.pcs{font-size:10px;color:var(--tx3)}
+.pcst{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.psti{background:var(--sf);border-radius:7px;padding:7px 9px;text-align:center}
+.pstv{font-size:17px;font-weight:700}.pstl{font-size:9px;color:var(--tx3);margin-top:1px}
+.pstb{height:3px;border-radius:99px;margin-top:5px}
+
+/* ── LOG ── */
+.lgi{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.lgi:last-child{border-bottom:none}
+.lgd{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.lgtx{font-size:11px;color:var(--tx);line-height:1.5}.lgtm{font-size:9px;color:var(--tx3);font-family:'DM Mono',monospace;margin-top:2px}
+
+/* ── ALERT ── */
+.alert{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:9px;padding:9px 13px;margin-bottom:14px;font-size:11px;color:#f59e0b;display:flex;align-items:center;gap:7px}
+.alert svg{width:13px;height:13px;fill:#f59e0b;flex-shrink:0}
+.alert-red{background:var(--reb);border-color:rgba(239,68,68,0.25);color:var(--re)}
+.alert-red svg{fill:var(--re)}
+
+/* ── LEMBRETE ── */
+.remind-card{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+.remind-card.urgente{border-color:rgba(239,68,68,0.4)}
+.remind-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.remind-tx{font-size:12px;font-weight:600;color:var(--tx)}
+.remind-dt{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;margin-top:2px}
+.remind-desc{font-size:11px;color:var(--tx2);margin-top:4px;line-height:1.5}
+
+/* ── BDAY ── */
+.bday-card{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bday-av{width:38px;height:38px;border-radius:50%;background:var(--v);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.bday-nm{font-size:13px;font-weight:600}
+.bday-dt{font-size:11px;color:var(--tx3)}
+.bday-age{font-size:11px;color:var(--am);font-weight:600;margin-left:auto}
+
+/* ── PROFISSIONAL ATIVA ── */
+.prof-card{background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:15px;margin-bottom:10px}
+.prof-hd{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.prof-photo{width:52px;height:52px;border-radius:12px;background:var(--v2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--am);flex-shrink:0;overflow:hidden;cursor:pointer;border:2px solid var(--bd2)}
+.prof-photo img{width:100%;height:100%;object-fit:cover}
+.prof-info{flex:1}
+.prof-nm{font-size:14px;font-weight:600}
+.prof-meta{font-size:11px;color:var(--tx3);margin-top:2px}
+.prof-docs{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.doc-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;background:var(--sf);border:1px solid var(--bd2);font-size:10px;color:var(--tx2);cursor:pointer;transition:all .15s}
+.doc-chip:hover{border-color:var(--bl);color:var(--bl)}
+.doc-chip svg{width:10px;height:10px;stroke:currentColor;fill:none}
+
+/* ── MODAL ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:50;align-items:flex-start;justify-content:center;padding:20px 14px;overflow-y:auto}
+.ov.open{display:flex}
+.mbox{background:var(--sf);border:1px solid var(--bd2);border-radius:16px;width:620px;padding:22px;position:relative;margin:auto}
+.mbox.wide{width:780px}
+.mbox.sm{width:440px}
+.mhd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:15px;flex-wrap:wrap;gap:8px}
+.mav{width:44px;height:44px;border-radius:12px;background:var(--v);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
+.macts{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.mcl{background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:5px 9px;color:var(--tx2);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}
+.di{background:var(--sf2);border-radius:7px;padding:8px 11px}
+.dil{font-size:9px;color:var(--tx3);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:2px;letter-spacing:.3px}
+.div{font-size:11px;color:var(--tx);font-weight:500;line-height:1.4}
+.full{grid-column:span 2}
+.recb{background:var(--v2);border:1px solid rgba(34,197,94,0.2);border-radius:9px;padding:11px;margin-top:11px}
+.rect{font-size:9px;color:var(--pa);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:3px}
+.recv{font-size:11px;color:var(--tx);line-height:1.6}
+.str{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.sbtn{padding:4px 11px;border-radius:99px;border:1px solid var(--bd2);font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.sbtn.active{background:var(--v);color:#fff;border-color:var(--v)}.sbtn:not(.active){background:var(--sf3);color:var(--tx2)}
+.lgs{margin-top:11px}.lgs h3{font-size:9px;font-weight:600;color:var(--tx2);margin-bottom:7px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.3px}
+
+/* ── DOCS SECTION ── */
+.docs-section{margin-top:12px}
+.docs-section h3{font-size:10px;font-weight:600;color:var(--tx2);margin-bottom:8px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center;justify-content:space-between}
+.doc-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.doc-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--sf2);border-radius:7px;border:1px solid var(--bd)}
+.doc-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:700}
+.doc-pdf{background:rgba(239,68,68,0.15);color:var(--re)}
+.doc-img{background:rgba(34,197,94,0.15);color:var(--pa)}
+.doc-xls{background:rgba(34,197,94,0.15);color:var(--pa)}
+.doc-gen{background:rgba(59,130,246,0.15);color:var(--bl)}
+.doc-nm{flex:1;font-size:11px;font-weight:500}
+.doc-sz{font-size:9px;color:var(--tx3);font-family:'DM Mono',monospace}
+.doc-date{font-size:9px;color:var(--tx3)}
+.upload-zone{border:2px dashed var(--bd2);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:border .15s}
+.upload-zone:hover{border-color:var(--v);background:rgba(27,107,58,0.05)}
+.upload-zone input{display:none}
+.upload-txt{font-size:11px;color:var(--tx3)}
+.upload-name-inp{width:100%;padding:7px 10px;background:var(--sf2);border:1px solid var(--bd2);border-radius:7px;color:var(--tx);font-size:11px;outline:none;font-family:'DM Sans',sans-serif;margin-top:7px}
+.upload-name-inp:focus{border-color:var(--v)}
+
+/* ── ASSINATURA ── */
+.sig-canvas{border:1px solid var(--bd2);border-radius:8px;cursor:crosshair;display:block;width:100%;background:#fff}
+.sig-hint{font-size:10px;color:var(--tx3);text-align:center;margin-top:4px}
+
+/* ── INTERVIEW NOTES ── */
+.notes-area{width:100%;min-height:160px;padding:10px 12px;background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;color:var(--tx);font-size:12px;outline:none;font-family:'DM Sans',sans-serif;resize:vertical;line-height:1.6}
+.notes-area:focus{border-color:var(--v)}
+
+/* ── TRUORA ── */
+.truora-result{background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:12px;margin-top:10px;font-size:12px;line-height:1.7}
+.truora-ok{border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05)}
+.truora-warn{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.05)}
+.truora-bad{border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.05)}
+.truora-loading{color:var(--tx3);font-style:italic}
+
+/* ── RELATÓRIOS ── */
+.rel-card{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:border .15s}
+.rel-card:hover{border-color:var(--v)}
+.rel-ic{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.rel-nm{font-size:13px;font-weight:600;margin-bottom:3px}
+.rel-desc{font-size:11px;color:var(--tx3);line-height:1.5}
+
+/* ── FORM INPUTS ── */
+.finp{width:100%;padding:8px 11px;background:var(--sf2);border:1px solid var(--bd2);border-radius:7px;color:var(--tx);font-size:12px;outline:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;transition:border .15s}
+.finp:focus{border-color:var(--v)}
+.finp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.flabel{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+
+/* ── EMPTY / LOADING / ERROR ── */
+.empty{text-align:center;padding:28px;color:var(--tx3);font-size:12px}
+.loading{text-align:center;padding:45px;color:var(--tx3);font-size:12px}
+.spin{width:22px;height:22px;border:2px solid var(--sf3);border-top-color:var(--v);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 10px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.errbox{text-align:center;padding:32px;color:var(--pc);font-size:12px;line-height:1.7}
+.errbox small{color:var(--tx3);font-size:11px;display:block;margin:7px 0 13px}
+
+/* ── PRINT ── */
+@media print{
+  *{visibility:hidden!important}
+  #pa{visibility:visible!important;position:fixed!important;top:0!important;left:0!important;width:100%!important;background:#fff!important;color:#000!important;padding:0!important;margin:0!important}
+  #pa *{visibility:visible!important}
+  @page{margin:15mm;size:A4 portrait}
+}
+
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.metrics{grid-template-columns:repeat(2,1fr)}.g2,.g3,.g4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div class="lov" id="lov">
+  <div class="lbox">
+    <div class="lic">MB</div>
+    <h2>Dashboard RH</h2>
+    <p>Maria Brasileira — Recrutamento & Produtividade</p>
+    <div id="login-step1">
+      <div class="flabel">Nome completo</div>
+      <input class="linp" id="lin-nome" placeholder="Seu nome..." onkeydown="if(event.key==='Enter')document.getElementById('lin-email').focus()">
+      <div class="flabel">Email</div>
+      <input class="linp" id="lin-email" type="email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')document.getElementById('lin-pass').focus()">
+      <div class="flabel">Senha</div>
+      <input class="linp" id="lin-pass" type="password" placeholder="Crie uma senha..." onkeydown="if(event.key==='Enter')solicitarToken()">
+      <button class="lbtn" onclick="solicitarToken()">Entrar / Cadastrar</button>
+    </div>
+    <div id="login-step2" style="display:none">
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:12px">Token enviado para seu email. Copie o token abaixo e envie manualmente caso o email não chegue:</p>
+      <div class="token-box">
+        <div class="token-num" id="token-display">------</div>
+        <div class="token-hint">Token válido por 10 minutos</div>
+      </div>
+      <a class="llink" id="mailto-link" href="#">📧 Clique para abrir email com o token</a>
+      <div class="flabel" style="margin-top:12px">Digite o token recebido</div>
+      <input class="linp" id="lin-token" maxlength="6" placeholder="000000" style="text-align:center;font-size:20px;letter-spacing:8px;font-family:'DM Mono',monospace" onkeydown="if(event.key==='Enter')validarToken()">
+      <button class="lbtn" onclick="validarToken()">Validar e Entrar</button>
+      <span class="llink" onclick="voltarLogin()">← Voltar</span>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICAÇÃO DE LEMBRETE -->
+<div id="remind-toast" style="display:none;position:fixed;top:16px;right:16px;z-index:200;background:var(--sf);border:1px solid var(--am);border-radius:12px;padding:14px 18px;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.4)">
+  <div style="font-size:11px;color:var(--am);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:4px">🔔 Lembrete</div>
+  <div id="remind-toast-text" style="font-size:13px;font-weight:600"></div>
+  <div id="remind-toast-desc" style="font-size:11px;color:var(--tx3);margin-top:3px"></div>
+  <button onclick="document.getElementById('remind-toast').style.display='none'" style="margin-top:8px;background:var(--am);border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;color:#1a1a1a">OK</button>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="slogo">
+    <div class="slic">MB</div>
+    <div><div class="slgn">Maria Brasileira</div><div class="slgs">RH DASHBOARD v7</div></div>
+  </div>
+  <nav class="snav">
+    <div class="sg">Principal</div>
+    <button class="si on" onclick="goTo('overview',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Visao Geral
+    </button>
+    <button class="si" onclick="goTo('lembretes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Lembretes
+      <span class="bc" id="cnt-rem">0</span>
+    </button>
+    <button class="si" onclick="goTo('aniversariantes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Aniversariantes
+      <span class="bc" id="cnt-bday">0</span>
+    </button>
+    <div class="sg">Recrutamento</div>
+    <button class="si" onclick="goTo('candidatas',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Candidatas
+      <span class="bc" id="cnt-cand">0</span>
+    </button>
+    <button class="si" onclick="goTo('triagem',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Triagem
+      <span class="bc" id="cnt-tri">0</span>
+    </button>
+    <div class="sg">Profissionais</div>
+    <button class="si" onclick="goTo('ativas',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Ativas
+      <span class="bc" id="cnt-ativas">0</span>
+    </button>
+    <div class="sg">Analise</div>
+    <button class="si" onclick="goTo('producao',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Producao RH
+    </button>
+    <button class="si" onclick="goTo('graficos',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Graficos
+    </button>
+    <button class="si" onclick="goTo('movimentacoes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Movimentacoes
+    </button>
+    <button class="si" onclick="goTo('relatorios',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>Relatorios
+    </button>
+  </nav>
+  <div class="sfooter">
+    <div class="uc" onclick="trocar()">
+      <div class="uav" id="uav">?</div>
+      <div><div class="unn" id="unm">...</div><div class="urr">Clique p/ trocar usuario</div></div>
+    </div>
+    <button class="syncb" onclick="carregarDados()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Atualizar dados
+    </button>
+    <button class="syncb" style="margin-top:5px;font-size:10px" onclick="configurarApiKey()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93L17.66 6.34M6.34 17.66l-1.41 1.41M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
+      Chave API (Truora)
+    </button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="fbar">
+    <span class="fbar-title" id="ptitle">Visao Geral</span>
+    <div class="sbox"><svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg><input type="text" id="fsrch" placeholder="Buscar candidata..." oninput="applyFilters()"></div>
+    <select class="fsel" id="fperfil" onchange="applyFilters()"><option value="">Todos perfis</option><option value="A">Perfil A</option><option value="B">Perfil B</option><option value="C">Perfil C</option></select>
+    <select class="fsel" id="fstatus" onchange="applyFilters()">
+      <option value="">Todos status</option>
+      <option value="Nova">Nova</option>
+      <option value="Contato">Contato</option>
+      <option value="Nao consegui contato">Nao consegui contato</option>
+      <option value="Entrevista">Entrevista</option>
+      <option value="Nao fez entrevista">Nao fez entrevista</option>
+      <option value="Nao foi no treinamento">Nao foi no treinamento</option>
+      <option value="Aprovada">Aprovada</option>
+      <option value="Reprovada">Reprovada</option>
+    </select>
+    <select class="fsel" id="fcidade" onchange="applyFilters()"><option value="">Todas cidades</option></select>
+    <select class="fsel" id="fmes" onchange="applyFilters()"><option value="">Todos meses</option></select>
+    <select class="fsel" id="fperiodo" onchange="applyFilters()"><option value="0">Todos periodos</option><option value="7">7 dias</option><option value="15">15 dias</option><option value="30">30 dias</option><option value="60">60 dias</option></select>
+    <button class="freset" onclick="resetFilters()">Limpar</button>
+    <span class="finfo" id="finfo"></span>
+  </div>
+  <div class="content" id="content"><div class="loading"><div class="spin"></div>Carregando...</div></div>
+</div>
+
+<!-- MODAIS -->
+<div class="ov" id="det-ov" onclick="closeOv('det-ov',event)"><div class="mbox wide" id="det-box"></div></div>
+<div class="ov" id="rem-ov" onclick="closeOv('rem-ov',event)"><div class="mbox sm" id="rem-box"></div></div>
+<div class="ov" id="prof-ov" onclick="closeOv('prof-ov',event)"><div class="mbox wide" id="prof-box"></div></div>
+<div class="ov" id="rel-ov" onclick="closeOv('rel-ov',event)"><div class="mbox wide" id="rel-box"></div></div>
+<div id="pa" style="display:none"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO
+// ═══════════════════════════════════════════════════════════
+const SU='https://script.google.com/macros/s/AKfycbzBrDeeN3ESqWtuHpnt5FsiHwnKj_1cc__vkDfqe2sin1vEIf8kC69QbE5V7EHLn5DC/exec';
+const WMSG=encodeURIComponent('Ola! Aqui e da equipe da *Maria Brasileira*!\n\nSeu cadastro foi *pre-aprovado*. Temos interesse em seguir com o processo!\n\nA proxima etapa e um bate-papo rapido para esclarecer duvidas sobre nossa parceria.\n\nVoce tem disponibilidade?');
+const MESES=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const ALL_STATUS=['Nova','Contato','Nao consegui contato','Entrevista','Nao fez entrevista','Nao foi no treinamento','Aprovada','Reprovada'];
+const S_COR={Nova:'#63b3ed','Contato':'#f59e0b','Nao consegui contato':'#fca5a5','Entrevista':'#a78bfa','Nao fez entrevista':'#9ca3af','Nao foi no treinamento':'#fb923c','Aprovada':'#22c55e','Reprovada':'#ef4444'};
+const S_CLS={Nova:'bn','Contato':'bco','Nao consegui contato':'bnc','Entrevista':'be','Nao fez entrevista':'bnf','Nao foi no treinamento':'bnt','Aprovada':'bap','Reprovada':'brp'};
+const WI='<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+
+// ═══════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════
+let allData=[],filtered=[],view='overview',statusLog=[],statusLocal={},currentUser='',currentUserEmail='';
+let charts={},reminders=[],profissionais=[],aniversariantes=[],docStorage={},notesStorage={},sigStorage={};
+let pendingToken='',pendingTokenUser='',pendingTokenEmail='',pendingTokenPass='';
+
+// ═══════════════════════════════════════════════════════════
+// INDEXEDDB — armazenamento de arquivos
+// ═══════════════════════════════════════════════════════════
+let db;
+function initDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open('MBDashv7',2);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('docs')) db.createObjectStore('docs',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('notes')) db.createObjectStore('notes',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('sigs')) db.createObjectStore('sigs',{keyPath:'id'});
+    };
+    req.onsuccess=e=>{db=e.target.result;resolve();};
+    req.onerror=()=>resolve();
+  });
+}
+function dbGet(store,id){return new Promise(r=>{if(!db)return r(null);const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).get(id);req.onsuccess=()=>r(req.result);req.onerror=()=>r(null);});}
+function dbPut(store,obj){return new Promise(r=>{if(!db)return r();const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(obj);tx.oncomplete=r;tx.onerror=r;});}
+function dbGetAll(store){return new Promise(r=>{if(!db)return r([]);const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).getAll();req.onsuccess=()=>r(req.result||[]);req.onerror=()=>r([]);});}
+function dbDel(store,id){return new Promise(r=>{if(!db)return r();const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(id);tx.oncomplete=r;tx.onerror=r;});}
+
+// ═══════════════════════════════════════════════════════════
+// LOGIN + TOKEN
+// ═══════════════════════════════════════════════════════════
+const users=()=>{try{return JSON.parse(localStorage.getItem('mb_users')||'{}');}catch(e){return{};}};
+function saveUsers(u){try{localStorage.setItem('mb_users',JSON.stringify(u));}catch(e){}}
+function genToken(){return String(Math.floor(100000+Math.random()*900000));}
+
+function solicitarToken(){
+  const nome=document.getElementById('lin-nome').value.trim();
+  const email=document.getElementById('lin-email').value.trim();
+  const pass=document.getElementById('lin-pass').value;
+  if(!nome||!email||!pass){alert('Preencha nome, email e senha.');return;}
+  const token=genToken();
+  pendingToken=token; pendingTokenUser=nome; pendingTokenEmail=email; pendingTokenPass=pass;
+  document.getElementById('token-display').textContent=token;
+  const subject=encodeURIComponent('Token de acesso — Maria Brasileira Dashboard');
+  const body=encodeURIComponent('Seu token de acesso ao Dashboard RH da Maria Brasileira:\n\n'+token+'\n\nVálido por 10 minutos.');
+  document.getElementById('mailto-link').href='mailto:'+email+'?subject='+subject+'&body='+body;
+  document.getElementById('login-step1').style.display='none';
+  document.getElementById('login-step2').style.display='block';
+}
+
+function validarToken(){
+  const inp=document.getElementById('lin-token').value.trim();
+  if(inp!==pendingToken){alert('Token incorreto. Tente novamente.');return;}
+  const u=users();
+  u[pendingTokenEmail]={nome:pendingTokenUser,pass:btoa(pendingTokenPass),email:pendingTokenEmail};
+  saveUsers(u);
+  finalizarLogin(pendingTokenUser,pendingTokenEmail);
+}
+
+function voltarLogin(){
+  document.getElementById('login-step1').style.display='block';
+  document.getElementById('login-step2').style.display='none';
+}
+
+function finalizarLogin(nome,email){
+  currentUser=nome; currentUserEmail=email;
+  try{localStorage.setItem('mb_session',JSON.stringify({nome,email,ts:Date.now()}));}catch(e){}
+  document.getElementById('lov').style.display='none';
+  document.getElementById('unm').textContent=nome;
+  document.getElementById('uav').textContent=nome.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  // Dados locais já carregados no init() — só busca a planilha
+  carregarDados();
+}
+
+function trocar(){
+  if(confirm('Trocar de usuario?\n\nSeus dados (movimentacoes, profissionais, lembretes) ficam salvos e serao vistos pelo proximo usuario.')) {
+    try{localStorage.removeItem('mb_session');}catch(e){}
+    location.reload();
+  }
+}
+
+function checkLogin(){
+  try{
+    const s=JSON.parse(localStorage.getItem('mb_session')||'{}');
+    if(s.nome&&s.email&&(Date.now()-s.ts)<86400000*7){
+      currentUser=s.nome; currentUserEmail=s.email;
+      document.getElementById('lov').style.display='none';
+      document.getElementById('unm').textContent=s.nome;
+      document.getElementById('uav').textContent=s.nome.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+const ini=n=>(n||'?').split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
+// WhatsApp com editor de mensagem
+const MSGS_TEMPLATE = {
+  preaprovado: 'Olá {nome}! Tudo bem?\n\nAqui é da equipe da *Maria Brasileira*! 😊\n\nFicamos felizes em informar que o seu cadastro foi *pré-aprovado* e gostaríamos de saber se você ainda tem interesse em seguir com o processo. ✅\n\nA próxima etapa é um bate-papo rápido para esclarecermos todas as suas dúvidas sobre nossa parceria.\n\nVocê tem disponibilidade para conversarmos? 💛',
+  naoAprovado: 'Olá {nome}! Tudo bem?\n\nAqui é da equipe da *Maria Brasileira*! 😊\n\nAgradecemos muito seu interesse em fazer parte da nossa equipe. Após análise do seu cadastro, infelizmente não conseguimos seguir com o processo neste momento.\n\nGuardaremos seu contato e assim que tivermos uma nova oportunidade, entraremos em contato. \n\nObrigada e boa sorte! 💛',
+  naoEntrevista: 'Olá {nome}! Tudo bem?\n\nAqui é da equipe da *Maria Brasileira*! 😊\n\nNotamos que você não compareceu à entrevista agendada. \n\nCaso queira reagendar ou tenha ocorrido algum imprevisto, fique à vontade para nos avisar. Ainda temos interesse no seu perfil! 💛',
+  lembrete: 'Olá {nome}! Tudo bem?\n\nAqui é da equipe da *Maria Brasileira*! 😊\n\nPassando para dar um oi e ver se você ainda tem interesse em fazer parte da nossa equipe. \n\nQualquer dúvida, estamos à disposição! 💛',
+  personalizado: 'Olá {nome}! Tudo bem?\n\nAqui é da equipe da *Maria Brasileira*! 😊\n\n',
+};
+
+function wa(numero, nomeCandidata) {
+  const nome = nomeCandidata || '';
+  abrirEditorWhats(numero, nome);
+}
+
+function abrirEditorWhats(numero, nome) {
+  const existing = document.getElementById('wa-editor-ov');
+  if(existing) document.body.removeChild(existing);
+  const ov = document.createElement('div');
+  ov.id = 'wa-editor-ov';
+  ov.style = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px';
+  const primeiroNome = nome ? nome.split(' ')[0] : '';
+  const msgDefault = (MSGS_TEMPLATE.preaprovado||'').replace(/\{nome\}/g, primeiroNome || 'candidata');
+  const wiSvg = '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+  const n = numero.replace(/['"]/g,'');
+  const pn = primeiroNome.replace(/['"]/g,'');
+  const box = document.createElement('div');
+  box.style = 'background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:22px;width:500px;max-width:95vw';
+  box.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
+      '<div>' +
+        '<div style="font-size:14px;font-weight:600">Enviar mensagem via WhatsApp</div>' +
+        '<div style="font-size:11px;color:var(--tx3);margin-top:2px">' + (nome||'') + (nome?' · ':'') + numero + '</div>' +
+      '</div>' +
+      '<button onclick="document.body.removeChild(document.getElementById(\'wa-editor-ov\'))" style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:5px 9px;color:var(--tx2);cursor:pointer;font-size:11px;font-family:DM Sans,sans-serif">Fechar</button>' +
+    '</div>' +
+    '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">' +
+      '<button onclick="setWaTemplate(\'preaprovado\',\'' + pn + '\')" style="padding:4px 10px;border:1px solid var(--bd2);border-radius:99px;background:var(--pab);color:var(--pa);font-size:10px;cursor:pointer;font-family:DM Sans,sans-serif">Pre-aprovado</button>' +
+      '<button onclick="setWaTemplate(\'naoAprovado\',\'' + pn + '\')" style="padding:4px 10px;border:1px solid var(--bd2);border-radius:99px;background:var(--reb);color:var(--re);font-size:10px;cursor:pointer;font-family:DM Sans,sans-serif">Nao aprovado</button>' +
+      '<button onclick="setWaTemplate(\'naoEntrevista\',\'' + pn + '\')" style="padding:4px 10px;border:1px solid var(--bd2);border-radius:99px;background:var(--pcb);color:var(--pc);font-size:10px;cursor:pointer;font-family:DM Sans,sans-serif">Nao foi entrevista</button>' +
+      '<button onclick="setWaTemplate(\'lembrete\',\'' + pn + '\')" style="padding:4px 10px;border:1px solid var(--bd2);border-radius:99px;background:var(--sf3);color:var(--tx2);font-size:10px;cursor:pointer;font-family:DM Sans,sans-serif">Lembrete</button>' +
+      '<button onclick="setWaTemplate(\'personalizado\',\'' + pn + '\')" style="padding:4px 10px;border:1px solid var(--bd2);border-radius:99px;background:var(--sf3);color:var(--tx2);font-size:10px;cursor:pointer;font-family:DM Sans,sans-serif">Personalizado</button>' +
+    '</div>' +
+    '<textarea id="wa-msg-txt" style="width:100%;min-height:200px;padding:10px;background:var(--sf2);border:1px solid var(--bd2);border-radius:8px;color:var(--tx);font-size:12px;outline:none;font-family:DM Sans,sans-serif;resize:vertical;line-height:1.6"></textarea>' +
+    '<div style="font-size:10px;color:var(--tx3);margin-top:5px">Edite a mensagem acima antes de enviar. Nome inserido automaticamente.</div>' +
+    '<button onclick="enviarWhats(\'' + n + '\')" style="width:100%;margin-top:12px;padding:11px;background:#25d366;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;display:flex;align-items:center;justify-content:center;gap:7px">' +
+      wiSvg + ' Abrir no WhatsApp' +
+    '</button>';
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+  ov.onclick = function(e) { if(e.target===ov) document.body.removeChild(ov); };
+  const ta = document.getElementById('wa-msg-txt');
+  if(ta) ta.value = msgDefault;
+}
+
+function setWaTemplate(tipo, nome) {
+  const el = document.getElementById('wa-msg-txt');
+  if(el) el.value = (MSGS_TEMPLATE[tipo]||'').replace(/\{nome\}/g, nome||'candidata');
+}
+
+function enviarWhats(numero) {
+  const txt = document.getElementById('wa-msg-txt')?.value || '';
+  const n = (numero||'').replace(/\D/g,'');
+  if(!n) { alert('Numero invalido.'); return; }
+  const ov = document.getElementById('wa-editor-ov');
+  if(ov) document.body.removeChild(ov);
+  window.open('https://wa.me/55'+n+'?text='+encodeURIComponent(txt),'_blank');
+}
+const BP=p=>p==='A'?'<span class="badge ba">A</span>':p==='B'?'<span class="badge bb">B</span>':'<span class="badge bc">C</span>';
+const BS=s=>'<span class="badge '+(S_CLS[s]||'bn')+'">'+(s||'Nova')+'</span>';
+
+function parseDate(s){
+  if(!s)return null;
+  const str=String(s).trim();
+  const br=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(br)return new Date(+br[3],+br[2]-1,+br[1]);
+  const iso=str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
+  const d=new Date(str);return isNaN(d)?null:d;
+}
+const dateKey=d=>{const dt=parseDate(d);return dt?dt.toLocaleDateString('pt-BR'):'';}
+const monthKey=d=>{const dt=parseDate(d);return dt?dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'):'';}
+const fmtDt=ts=>{if(!ts)return'--';const d=new Date(ts);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+
+const score=c=>{let p=0;if(c['Exp. Residencias']==='SIM'||c['Exp. Residências']==='SIM')p+=2;if(c['Exp. Empresarial']==='SIM')p+=2;const rr=c['Ref. Residencias']||c['Ref. Residências']||'';if(rr&&!/^n[aã]/i.test(rr))p+=2;const re=c['Ref. Empresarial']||'';if(re&&!/^n[aã]/i.test(re))p+=2;const d=(c['Dias Disponíveis']||c['Dias Disponiveis']||'').split(',').filter(Boolean).length;p+=Math.min(d,3);if(/^n[aã]/i.test(c['Fumante']||''))p+=1;if(c['Transporte']&&!/^a p/i.test(c['Transporte']))p+=1;return Math.min(Math.round((p/13)*100),100);};
+const rec=c=>{const p=c['Perfil'],d=(c['Dias Disponíveis']||c['Dias Disponiveis']||'').split(',').filter(Boolean).length;const rr=c['Ref. Residencias']||c['Ref. Residências']||'';const temRef=rr&&!/^n[aã]/i.test(rr);if(p==='A')return'Candidata de alta prioridade. '+(temRef?'Possui referencias verificaveis — contate hoje!':'Bom perfil geral.')+(d>=4?' Disponivel '+d+' dias.':'');if(p==='B')return'Boa candidata. Avaliar disponibilidade na entrevista.'+(c['Fumante']==='SIM'?' Atencao: fumante.':'')+' Contatar em ate 48h.';return'Candidata iniciante. Avaliar com cautela. Fila de espera.';};
+
+// Dias no status
+function diasNoStatus(c){
+  const w=c['WhatsApp']||'';
+  const logs=statusLog.filter(l=>l.whats===w).slice(0,1);
+  if(logs.length){const d=Math.floor((Date.now()-new Date(logs[0].ts).getTime())/86400000);return d;}
+  const dt=parseDate(c['Data Cadastro']);
+  return dt?Math.floor((Date.now()-dt.getTime())/86400000):0;
+}
+function diasBadge(c){
+  const d=diasNoStatus(c);const st=getStatus(c);
+  if(st==='Nova'&&c['Perfil']==='A'&&d>=2) return'<span class="dsb dsb-alert">'+d+'d no status ⚠</span>';
+  if(d>=5) return'<span class="dsb dsb-warn">'+d+'d</span>';
+  return'<span class="dsb dsb-ok">'+d+'d</span>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATUS
+// ═══════════════════════════════════════════════════════════
+function loadPersist(){
+  try{statusLocal=JSON.parse(localStorage.getItem('mb_st')||'{}');}catch(e){statusLocal={};}
+  try{statusLog=JSON.parse(localStorage.getItem('mb_log')||'[]');}catch(e){statusLog=[];}
+  try{reminders=JSON.parse(localStorage.getItem('mb_rem')||'[]');}catch(e){reminders=[];}
+  try{profissionais=JSON.parse(localStorage.getItem('mb_prof')||'[]');}catch(e){profissionais=[];}
+  try{aniversariantes=JSON.parse(localStorage.getItem('mb_bday')||'[]');}catch(e){aniversariantes=[];}
+  try{notesStorage=JSON.parse(localStorage.getItem('mb_notes')||'{}');}catch(e){notesStorage={};}
+  try{sigStorage=JSON.parse(localStorage.getItem('mb_sig')||'{}');}catch(e){sigStorage={};}
+}
+function savePersist(){
+  try{localStorage.setItem('mb_st',JSON.stringify(statusLocal));localStorage.setItem('mb_log',JSON.stringify(statusLog));localStorage.setItem('mb_rem',JSON.stringify(reminders));localStorage.setItem('mb_prof',JSON.stringify(profissionais));localStorage.setItem('mb_bday',JSON.stringify(aniversariantes));localStorage.setItem('mb_notes',JSON.stringify(notesStorage));localStorage.setItem('mb_sig',JSON.stringify(sigStorage));}catch(e){}
+}
+const getStatus=c=>statusLocal[c['WhatsApp']]||c['Status']||'Nova';
+function setStatus(w,v){
+  const c=allData.find(x=>x['WhatsApp']===w);
+  const de=getStatus(c||{WhatsApp:w});
+  if(de===v)return;
+  statusLocal[w]=v;
+  statusLog.unshift({candidata:c?c['Nome']||w:w,whats:w,de,para:v,usuario:currentUser,ts:new Date().toISOString()});
+  if(statusLog.length>5000)statusLog=statusLog.slice(0,5000);
+  savePersist();updateBadges();renderView();
+}
+function updateBadges(){
+  const novas=allData.filter(c=>getStatus(c)==='Nova').length;
+  document.getElementById('cnt-cand').textContent=allData.length;
+  document.getElementById('cnt-tri').textContent=novas;
+  document.getElementById('cnt-ativas').textContent=profissionais.length;
+  const hoje=new Date();
+  const bdayHoje=aniversariantes.filter(a=>{const dt=parseDate(a.nascimento);return dt&&dt.getDate()===hoje.getDate()&&dt.getMonth()===hoje.getMonth();}).length;
+  document.getElementById('cnt-bday').textContent=bdayHoje;
+  const remUrgentes=reminders.filter(r=>{if(r.done)return false;const dt=new Date(r.dt);const now=new Date();return dt<=new Date(now.getTime()+3600000);}).length;
+  document.getElementById('cnt-rem').textContent=remUrgentes||'';
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILTROS
+// ═══════════════════════════════════════════════════════════
+function populateSelects(){
+  const cs=document.getElementById('fcidade');const cv=cs.value;
+  const cidades=[...new Set(allData.map(c=>c['Cidade Interesse']).filter(Boolean))].sort();
+  cs.innerHTML='<option value="">Todas cidades</option>'+cidades.map(c=>'<option'+(c===cv?' selected':'')+'>'+c+'</option>').join('');
+  const ms=document.getElementById('fmes');const mv=ms.value;
+  const meses=[...new Set(allData.map(c=>monthKey(c['Data Cadastro'])).filter(Boolean))].sort().reverse();
+  ms.innerHTML='<option value="">Todos meses</option>'+meses.map(m=>{const[y,mo]=m.split('-');return'<option value="'+m+'"'+(m===mv?' selected':'')+'>'+MESES[+mo-1]+' '+y+'</option>';}).join('');
+}
+function applyFilters(){
+  const q=(document.getElementById('fsrch').value||'').toLowerCase();
+  const fp=document.getElementById('fperfil').value||'';
+  const fs=document.getElementById('fstatus').value||'';
+  const fc=document.getElementById('fcidade').value||'';
+  const fm=document.getElementById('fmes').value||'';
+  const per=parseInt(document.getElementById('fperiodo').value||'0');
+  const cutoff=per>0?new Date(Date.now()-per*86400000):null;
+  filtered=allData.filter(c=>{
+    if(q&&!(c['Nome']||'').toLowerCase().includes(q)&&!(c['WhatsApp']||'').includes(q))return false;
+    if(fp&&c['Perfil']!==fp)return false;
+    if(fs&&getStatus(c)!==fs)return false;
+    if(fc&&c['Cidade Interesse']!==fc)return false;
+    if(fm&&monthKey(c['Data Cadastro'])!==fm)return false;
+    if(cutoff){const d=parseDate(c['Data Cadastro']);if(!d||d<cutoff)return false;}
+    return true;
+  }).sort((a,b)=>({'A':0,'B':1,'C':2}[a['Perfil']]??3)-({'A':0,'B':1,'C':2}[b['Perfil']]??3));
+  const fi=document.getElementById('finfo');
+  if(fi)fi.textContent=filtered.length+'/'+allData.length;
+  renderView();
+}
+function resetFilters(){
+  ['fsrch','fperfil','fstatus','fcidade','fmes','fperiodo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('fperiodo').value='0';
+  applyFilters();
+}
+
+// ═══════════════════════════════════════════════════════════
+// TABELA HELPER
+// ═══════════════════════════════════════════════════════════
+function buildTable(data){
+  if(!data.length) return '<div class="empty">Nenhuma candidata encontrada.</div>';
+  var rows = data.map(function(c){
+    var w = (c['WhatsApp']||'').replace(/['"]/g,'');
+    var nm = (c['Nome']||'').split(' ')[0].replace(/['"]/g,'');
+    var st = getStatus(c);
+    var s = score(c);
+    var scol = s>=75?'var(--pa)':s>=45?'var(--pb)':'var(--pc)';
+    var ll = statusLog.filter(function(l){return l.whats===c['WhatsApp'];})[0];
+    var opts = ALL_STATUS.map(function(sv){
+      return '<option'+(st===sv?' selected':'')+'>'+sv+'</option>';
+    }).join('');
+    var statusCl = S_CLS[st]||'bn';
+    return '<tr>'+
+      '<td><div style="display:flex;align-items:center;gap:7px">'+
+        '<div class="ini">'+ini(c['Nome'])+'</div>'+
+        '<div><div style="font-weight:500">'+(c['Nome']||'--')+'</div>'+
+        '<div style="font-size:9px;color:var(--tx3);font-family:DM Mono,monospace">'+(c['WhatsApp']||'--')+'</div></div>'+
+      '</div></td>'+
+      '<td>'+BP(c['Perfil'])+'</td>'+
+      '<td><div style="display:flex;align-items:center;gap:4px">'+
+        '<div style="width:38px;height:3px;background:var(--sf3);border-radius:99px;overflow:hidden">'+
+          '<div style="width:'+s+'%;height:100%;background:'+scol+'"></div></div>'+
+        '<span style="font-size:9px;color:var(--tx3)">'+s+'%</span></div></td>'+
+      '<td style="color:var(--tx2)">'+(c['Cidade Interesse']||'--')+'</td>'+
+      '<td><select class="ssel badge '+statusCl+'" onchange="setStatus(this.dataset.w,this.value)" data-w="'+w+'">'+opts+'</select></td>'+
+      '<td>'+diasBadge(c)+'</td>'+
+      '<td style="font-size:9px;color:var(--tx3);white-space:nowrap">'+(ll?ll.usuario.split(' ')[0]+' '+fmtDt(ll.ts).split(' ')[0]:'--')+'</td>'+
+      '<td style="font-size:9px;color:var(--tx3);white-space:nowrap">'+(c['Data Cadastro']||'--')+'</td>'+
+      '<td><div style="display:flex;gap:3px">'+
+        '<button class="wb" data-num="'+w+'" data-nome="'+nm+'" onclick="wa(this.dataset.num,this.dataset.nome)" title="WhatsApp">'+WI+'</button>'+
+        '<button class="vbtn" data-w="'+w+'" onclick="openDet(this.dataset.w)">Ver</button>'+
+      '</div></td>'+
+      '</tr>';
+  });
+  return '<div class="tscroll"><table>'+
+    '<thead><tr>'+
+      '<th>Nome</th><th>Perfil</th><th>Score</th><th>Cidade</th>'+
+      '<th>Status</th><th>Dias/Status</th><th>Ultima mov.</th><th>Cadastro</th><th></th>'+
+    '</tr></thead>'+
+    '<tbody>'+rows.join('')+'</tbody>'+
+    '</table></div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHARTS HELPER
+// ═══════════════════════════════════════════════════════════
+const CO={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{bodyFont:{family:'DM Mono',size:11},titleFont:{family:'DM Sans',size:12},backgroundColor:'rgba(22,43,30,0.95)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a7a65',font:{size:9,family:'DM Mono'}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a7a65',font:{size:9,family:'DM Mono'}},beginAtZero:true}}};
+function mkChart(id,type,labels,datasets,extra){
+  const el=document.getElementById(id);if(!el)return;
+  if(charts[id])charts[id].destroy();
+  const cfg={type,data:{labels,datasets},options:{...CO,...(extra||{})}};
+  if(type==='doughnut'||type==='pie'){delete cfg.options.scales;cfg.options.plugins={legend:{display:true,position:'bottom',labels:{color:'#9ab5a3',font:{size:10,family:'DM Mono'},boxWidth:10,padding:8}},tooltip:CO.plugins.tooltip};}
+  charts[id]=new Chart(el,cfg);
+}
+function lastNDays(n){const days=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toLocaleDateString('pt-BR'));}return days;}
+function countByDay(data,days){return days.map(label=>data.filter(c=>dateKey(c['Data Cadastro'])===label).length);}
+function logsByDay(logs,days){return days.map(label=>logs.filter(l=>new Date(l.ts).toLocaleDateString('pt-BR')===label).length);}
+
+// ═══════════════════════════════════════════════════════════
+// VISÃO GERAL
+// ═══════════════════════════════════════════════════════════
+function renderOverview(){
+  const data=filtered;
+  const total=data.length;
+  const a=data.filter(c=>c['Perfil']==='A').length;
+  const b=data.filter(c=>c['Perfil']==='B').length;
+  const cv=data.filter(c=>c['Perfil']==='C').length;
+  const novas=data.filter(c=>getStatus(c)==='Nova').length;
+  const aprov=data.filter(c=>getStatus(c)==='Aprovada').length;
+  const reprov=data.filter(c=>getStatus(c)==='Reprovada').length;
+  const em=data.filter(c=>['Contato','Entrevista'].includes(getStatus(c))).length;
+  const urgentes=data.filter(c=>getStatus(c)==='Nova'&&c['Perfil']==='A');
+  const alertas=data.filter(c=>diasNoStatus(c)>=2&&getStatus(c)==='Nova'&&c['Perfil']==='A');
+  const days14=lastNDays(14);
+  document.getElementById('content').innerHTML=
+    (urgentes.length?'<div class="alert"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+urgentes.length+' Perfil A aguardando contato!</div>':'')+
+    (alertas.length?'<div class="alert alert-red"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+alertas.length+' candidata(s) Perfil A ha mais de 2 dias sem contato!</div>':'')+
+    '<div class="metrics">'+
+    '<div class="mc"><div class="mcl">Candidatas</div><div class="mcv">'+total+'</div><div class="mcs">'+novas+' novas</div></div>'+
+    '<div class="mc"><div class="mcl">Taxa aprovacao</div><div class="mcv" style="color:var(--pa)">'+(total?Math.round(aprov/total*100):0)+'%</div><div class="mcs">'+aprov+' aprovadas</div></div>'+
+    '<div class="mc"><div class="mcl">Em andamento</div><div class="mcv" style="color:var(--pb)">'+em+'</div><div class="mcs">contato + entrevista</div></div>'+
+    '<div class="mc"><div class="mcl">Perfil A</div><div class="mcv" style="color:var(--pa)">'+a+'</div><div class="mcs">'+(total?Math.round(a/total*100):0)+'% do total</div></div>'+
+    '<div class="mc"><div class="mcl">Reprovadas</div><div class="mcv" style="color:var(--re)">'+reprov+'</div><div class="mcs">'+(total?Math.round(reprov/total*100):0)+'% do total</div></div>'+
+    '</div>'+
+    '<div class="g2">'+
+    '<div class="panel"><div class="pt">Cadastros por dia <span>ultimos 14 dias</span></div><div class="ch"><canvas id="ch-cad"></canvas></div></div>'+
+    '<div class="panel"><div class="pt">Funil de status</div><div class="ch"><canvas id="ch-funil"></canvas></div></div>'+
+    '</div>'+
+    '<div class="g3">'+
+    '<div class="panel"><div class="pt">Perfis A/B/C</div><div class="chsm"><canvas id="ch-perf"></canvas></div></div>'+
+    '<div class="panel"><div class="pt">Movimentacoes por dia</div><div class="chsm"><canvas id="ch-mov"></canvas></div></div>'+
+    '<div class="panel"><div class="pt">Cidades</div>'+[...new Set(allData.map(c=>c['Cidade Interesse']).filter(Boolean))].map(ci=>{const n=allData.filter(c=>c['Cidade Interesse']===ci).length;const pct=Math.round(n/(allData.length||1)*100);return'<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><div style="font-size:10px;color:var(--tx2);min-width:75px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+ci+'</div><div style="flex:1;height:3px;background:var(--sf2);border-radius:99px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:var(--v)"></div></div><div style="font-size:9px;color:var(--tx3);font-family:DM Mono,monospace;min-width:16px;text-align:right">'+n+'</div></div>';}).join('')+'</div>'+
+    '</div>'+
+    '<div class="tpanel"><div class="tbar"><h2>Todas as candidatas filtradas ('+data.length+')</h2></div>'+buildTable(data)+'</div>';
+  setTimeout(()=>{
+    const lbs=days14.map(d=>d.substring(0,5));
+    mkChart('ch-cad','bar',lbs,[{data:countByDay(allData,days14),backgroundColor:'rgba(27,107,58,0.75)',borderColor:'#22c55e',borderWidth:1,borderRadius:3,label:'Cadastros'}]);
+    const stC=ALL_STATUS.map(s=>data.filter(c=>getStatus(c)===s).length);
+    mkChart('ch-funil','bar',ALL_STATUS.map(s=>s.substring(0,10)),[{data:stC,backgroundColor:ALL_STATUS.map(s=>S_COR[s]+'bb'),borderRadius:3}]);
+    mkChart('ch-perf','doughnut',['Perfil A','Perfil B','Perfil C'],[{data:[a,b,cv],backgroundColor:['rgba(34,197,94,0.85)','rgba(245,158,11,0.85)','rgba(249,115,22,0.85)'],borderWidth:0}]);
+    mkChart('ch-mov','line',lbs,[{data:logsByDay(statusLog,days14),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',tension:.3,fill:true,pointRadius:2}]);
+  },80);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CANDIDATAS
+// ═══════════════════════════════════════════════════════════
+function renderCandidatas(){
+  document.getElementById('content').innerHTML='<div class="tpanel"><div class="tbar"><h2>Candidatas ('+filtered.length+')</h2></div>'+buildTable(filtered)+'</div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// TRIAGEM
+// ═══════════════════════════════════════════════════════════
+function renderTriagem(){
+  const novas=allData.filter(c=>getStatus(c)==='Nova');
+  const col=(p,label,cor,prazo)=>{
+    const list=novas.filter(c=>c['Perfil']===p);
+    return'<div><div style="display:flex;align-items:center;gap:6px;margin-bottom:9px"><div style="width:7px;height:7px;border-radius:50%;background:'+cor+'"></div><span style="font-size:12px;font-weight:600;color:'+cor+'">'+label+'</span><span style="font-size:9px;color:var(--tx3);margin-left:auto;font-family:DM Mono,monospace">'+list.length+' · '+prazo+'</span></div>'+
+      (list.length?list.map(c=>{
+        const w=(c['WhatsApp']||'').replace(/['"]/g,'');
+        const dias=(c['Dias Disponíveis']||c['Dias Disponiveis']||'').split(',').map(d=>d.trim()).filter(Boolean);
+        const d=diasNoStatus(c);
+        const dCor=d>=2&&c['Perfil']==='A'?'var(--re)':'var(--tx3)';
+        return'<div style="background:var(--sf2);border:1px solid var(--bd)'+(d>=2&&c['Perfil']==='A'?';border-left:3px solid var(--re)':'')+';border-radius:9px;padding:11px;margin-bottom:7px">'+
+          '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;gap:6px;flex-wrap:wrap">'+
+          '<div style="display:flex;align-items:center;gap:7px"><div class="ini" style="width:32px;height:32px;font-size:10px">'+ini(c['Nome'])+'</div>'+
+          '<div><div style="font-size:12px;font-weight:600">'+(c['Nome']||'--')+'</div><div style="font-size:10px;color:var(--tx3);font-family:DM Mono,monospace">'+(c['WhatsApp']||'--')+' · '+(c['Cidade Interesse']||'--')+'</div>'+
+          '<div style="font-size:9px;color:'+dCor+';margin-top:2px">Ha '+d+' dia(s) neste status</div></div></div>'+
+          '<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">'+BP(c['Perfil'])+
+          '<button class="wbf" onclick="wa(\''+w+'\')">'+WI+' Contatar</button>'+
+          '<button class="gbtn" onclick="setStatus(\''+w+'\',\'Contato\')">Marcar contato</button>'+
+          '<button class="vbtn" onclick="openDet(\''+w+'\')">Ver</button></div></div>'+
+          '<div style="display:flex;flex-wrap:wrap;gap:3px">'+dias.slice(0,5).map(d=>'<span class="tag">'+d.replace('-Feira','')+'</span>').join('')+
+          (c['Transporte']?'<span class="tag">'+c['Transporte']+'</span>':'')+
+          (c['Exp. Residencias']==='SIM'||c['Exp. Residências']==='SIM'?'<span class="tag" style="background:var(--pab);color:var(--pa)">Resid.</span>':'')+
+          (c['Exp. Empresarial']==='SIM'?'<span class="tag" style="background:var(--pab);color:var(--pa)">Empr.</span>':'')+
+          (c['Fumante']==='SIM'?'<span class="tag" style="background:var(--reb);color:var(--re)">Fumante</span>':'')+'</div></div>';
+      }).join(''):'<div class="empty" style="padding:14px;font-size:11px">Nenhuma pendente</div>')+
+      '</div>';
+  };
+  document.getElementById('content').innerHTML='<div class="g3" style="align-items:start">'+col('A','Perfil A','var(--pa)','Hoje')+col('B','Perfil B','var(--pb)','48h')+col('C','Perfil C','var(--pc)','Espera')+'</div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRODUÇÃO RH
+// ═══════════════════════════════════════════════════════════
+function renderProducao(){
+  const usuarios=[...new Set(statusLog.map(l=>l.usuario).filter(Boolean))];
+  if(!usuarios.length){document.getElementById('content').innerHTML='<div class="empty" style="padding:50px">Nenhuma movimentacao registrada. Altere o status de uma candidata para iniciar o controle de producao.</div>';return;}
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const semana=new Date(Date.now()-7*86400000);
+  const mes=new Date();mes.setDate(1);
+  const stats=usuarios.map(u=>{
+    const logs=statusLog.filter(l=>l.usuario===u);
+    return{u,total:logs.length,hoje:logs.filter(l=>new Date(l.ts).toLocaleDateString('pt-BR')===hoje).length,semana:logs.filter(l=>new Date(l.ts)>=semana).length,mes:logs.filter(l=>new Date(l.ts)>=mes).length,aprov:logs.filter(l=>l.para==='Aprovada').length,reprov:logs.filter(l=>l.para==='Reprovada').length,contato:logs.filter(l=>l.para==='Contato').length,entrev:logs.filter(l=>l.para==='Entrevista').length,ncc:logs.filter(l=>l.para==='Nao consegui contato').length};
+  }).sort((a,b)=>b.total-a.total);
+  const cards=stats.map(s=>'<div class="pcard"><div class="pchd"><div class="pcav">'+ini(s.u)+'</div><div><div class="pcn">'+s.u+'</div><div class="pcs">'+s.total+' movimentacoes totais</div></div></div><div class="pcst">'+
+    '<div class="psti"><div class="pstv" style="color:var(--bl)">'+s.hoje+'</div><div class="pstl">Hoje</div></div>'+
+    '<div class="psti"><div class="pstv" style="color:var(--pu)">'+s.semana+'</div><div class="pstl">7 dias</div></div>'+
+    '<div class="psti"><div class="pstv" style="color:var(--la)">'+s.mes+'</div><div class="pstl">Mes</div></div>'+
+    '<div class="psti"><div class="pstv" style="color:var(--pa)">'+s.aprov+'</div><div class="pstl">Aprovadas</div></div>'+
+    '</div>'+
+    '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'+
+    '<span class="tag">Contatos: <b>'+s.contato+'</b></span><span class="tag">Entrev: <b>'+s.entrev+'</b></span><span class="tag" style="color:var(--re)">N. conseguiu: <b>'+s.ncc+'</b></span><span class="tag" style="color:var(--re)">Reprov: <b>'+s.reprov+'</b></span>'+
+    '</div></div>').join('');
+  const days14=lastNDays(14);
+  const lbs=days14.map(d=>d.substring(0,5));
+  document.getElementById('content').innerHTML=
+    '<div class="g2"><div class="panel"><div class="pt">Producao por recrutadora</div>'+cards+'</div>'+
+    '<div class="panel"><div class="pt">Movimentacoes por dia <span>14 dias</span></div><div class="chlg"><canvas id="ch-pmov"></canvas></div></div></div>'+
+    '<div class="g2"><div class="panel"><div class="pt">Resultado — aprovadas vs reprovadas</div><div class="ch"><canvas id="ch-pres"></canvas></div></div>'+
+    '<div class="panel"><div class="pt">Status sem contato — Nao consegui contato por dia</div><div class="ch"><canvas id="ch-pncc"></canvas></div></div></div>';
+  setTimeout(()=>{
+    const movD=days14.map(d=>statusLog.filter(l=>new Date(l.ts).toLocaleDateString('pt-BR')===d).length);
+    const apD=days14.map(d=>statusLog.filter(l=>new Date(l.ts).toLocaleDateString('pt-BR')===d&&l.para==='Aprovada').length);
+    const ctD=days14.map(d=>statusLog.filter(l=>new Date(l.ts).toLocaleDateString('pt-BR')===d&&l.para==='Contato').length);
+    mkChart('ch-pmov','bar',lbs,[{label:'Movimentacoes',data:movD,backgroundColor:'rgba(59,130,246,0.7)',borderRadius:3},{label:'Contatos',data:ctD,backgroundColor:'rgba(245,158,11,0.7)',borderRadius:3},{label:'Aprovadas',data:apD,backgroundColor:'rgba(34,197,94,0.7)',borderRadius:3}],{plugins:{legend:{display:true,labels:{color:'#9ab5a3',font:{size:9,family:'DM Mono'},boxWidth:9,padding:8}}}});
+    const ap=allData.filter(c=>getStatus(c)==='Aprovada').length;const rp=allData.filter(c=>getStatus(c)==='Reprovada').length;const and=allData.length-ap-rp;
+    mkChart('ch-pres','doughnut',['Aprovadas','Reprovadas','Em andamento'],[{data:[ap,rp,and],backgroundColor:['rgba(34,197,94,0.85)','rgba(239,68,68,0.85)','rgba(245,158,11,0.85)'],borderWidth:0}]);
+    const nccD=days14.map(d=>statusLog.filter(l=>new Date(l.ts).toLocaleDateString('pt-BR')===d&&l.para==='Nao consegui contato').length);
+    mkChart('ch-pncc','bar',lbs,[{data:nccD,backgroundColor:'rgba(252,165,165,0.7)',borderRadius:3}]);
+  },80);
+}
+
+// ═══════════════════════════════════════════════════════════
+// GRÁFICOS
+// ═══════════════════════════════════════════════════════════
+function renderGraficos(){
+  const data=filtered;
+  document.getElementById('content').innerHTML=
+    '<div class="g2"><div class="panel"><div class="pt">Cadastros por dia <span>30 dias</span></div><div class="chlg"><canvas id="cg1"></canvas></div></div>'+
+    '<div class="panel"><div class="pt">Status atual</div><div class="chlg"><canvas id="cg2"></canvas></div></div></div>'+
+    '<div class="g3"><div class="panel"><div class="pt">Perfis</div><div class="ch"><canvas id="cg3"></canvas></div></div>'+
+    '<div class="panel"><div class="pt">Como conheceram</div><div class="ch"><canvas id="cg4"></canvas></div></div>'+
+    '<div class="panel"><div class="pt">Preferencia atendimento</div><div class="ch"><canvas id="cg5"></canvas></div></div></div>'+
+    '<div class="g2"><div class="panel"><div class="pt">Dias disponíveis mais comuns</div><div class="ch"><canvas id="cg6"></canvas></div></div>'+
+    '<div class="panel"><div class="pt">Transporte</div><div class="ch"><canvas id="cg7"></canvas></div></div></div>';
+  setTimeout(()=>{
+    const d30=lastNDays(30);
+    mkChart('cg1','bar',d30.map(d=>d.substring(0,5)),[{data:countByDay(allData,d30),backgroundColor:'rgba(27,107,58,0.75)',borderColor:'#22c55e',borderWidth:1,borderRadius:3}]);
+    const stC=ALL_STATUS.map(s=>data.filter(c=>getStatus(c)===s).length);
+    mkChart('cg2','doughnut',ALL_STATUS,[{data:stC,backgroundColor:ALL_STATUS.map(s=>S_COR[s]+'bb'),borderWidth:0}]);
+    const pa=data.filter(c=>c['Perfil']==='A').length,pb=data.filter(c=>c['Perfil']==='B').length,pc=data.filter(c=>c['Perfil']==='C').length;
+    mkChart('cg3','doughnut',['Perfil A','Perfil B','Perfil C'],[{data:[pa,pb,pc],backgroundColor:['rgba(34,197,94,0.85)','rgba(245,158,11,0.85)','rgba(249,115,22,0.85)'],borderWidth:0}]);
+    const fm={};data.forEach(c=>{const f=c['Como Conheceu']||'Outros';fm[f]=(fm[f]||0)+1;});
+    const fe=Object.entries(fm).sort((a,b)=>b[1]-a[1]).slice(0,7);
+    mkChart('cg4','bar',fe.map(x=>x[0]),[{data:fe.map(x=>x[1]),backgroundColor:'rgba(245,196,0,0.75)',borderRadius:3}]);
+    const pm={};data.forEach(c=>{const p=c['Pref. Atendimento']||'N/I';pm[p]=(pm[p]||0)+1;});
+    mkChart('cg5','doughnut',Object.keys(pm),[{data:Object.values(pm),backgroundColor:['rgba(27,107,58,0.85)','rgba(245,196,0,0.85)','rgba(249,115,22,0.85)'],borderWidth:0}]);
+    const dm={};data.forEach(c=>(c['Dias Disponíveis']||c['Dias Disponiveis']||'').split(',').forEach(d=>{const dd=d.trim().replace('-Feira','');if(dd)dm[dd]=(dm[dd]||0)+1;}));
+    const de=Object.entries(dm).sort((a,b)=>b[1]-a[1]);
+    mkChart('cg6','bar',de.map(x=>x[0]),[{data:de.map(x=>x[1]),backgroundColor:'rgba(167,139,250,0.75)',borderRadius:3}]);
+    const tm={};data.forEach(c=>{const t=c['Transporte']||'N/I';tm[t]=(tm[t]||0)+1;});
+    const te=Object.entries(tm).sort((a,b)=>b[1]-a[1]);
+    mkChart('cg7','bar',te.map(x=>x[0]),[{data:te.map(x=>x[1]),backgroundColor:'rgba(59,130,246,0.75)',borderRadius:3}]);
+  },80);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MOVIMENTAÇÕES
+// ═══════════════════════════════════════════════════════════
+function renderMovimentacoes(){
+  const usuarios=[...new Set(statusLog.map(l=>l.usuario).filter(Boolean))];
+  const fu=document.getElementById('flog-u')?.value||'';
+  const log=statusLog.filter(l=>!fu||l.usuario===fu).slice(0,500);
+  document.getElementById('content').innerHTML=
+    '<div class="tpanel"><div class="tbar"><h2>Movimentacoes ('+statusLog.length+')</h2>'+
+    '<select class="fsel" id="flog-u" onchange="renderMovimentacoes()"><option value="">Todas recrutadoras</option>'+usuarios.map(u=>'<option'+(u===fu?' selected':'')+'>'+u+'</option>').join('')+'</select></div>'+
+    (log.length?'<div class="tscroll"><table><thead><tr><th>Data/Hora</th><th>Candidata</th><th>De</th><th>Para</th><th>Recrutadora</th></tr></thead><tbody>'+
+    log.map(l=>'<tr><td style="font-size:9px;color:var(--tx3);font-family:DM Mono,monospace;white-space:nowrap">'+fmtDt(l.ts)+'</td><td><div style="font-weight:500">'+l.candidata+'</div><div style="font-size:9px;color:var(--tx3)">'+l.whats+'</div></td><td>'+BS(l.de)+'</td><td><span class="badge" style="background:'+(S_COR[l.para]||'#888')+'22;color:'+(S_COR[l.para]||'#888')+'">'+l.para+'</span></td><td style="font-weight:500">'+l.usuario+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Nenhuma movimentacao registrada ainda.</div>')+
+    '</div>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// LEMBRETES
+// ═══════════════════════════════════════════════════════════
+function renderLembretes(){
+  const now=new Date();
+  const ativos=reminders.filter(r=>!r.done).sort((a,b)=>new Date(a.dt)-new Date(b.dt));
+  const feitos=reminders.filter(r=>r.done).slice(0,10);
+  document.getElementById('content').innerHTML=
+    '<div class="g2" style="align-items:start">'+
+    '<div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h2 style="font-size:13px;font-weight:600">Lembretes ativos ('+ativos.length+')</h2><button class="gbtn" onclick="openNovoLembrete()">+ Novo lembrete</button></div>'+
+    (ativos.length?ativos.map(r=>{
+      const dt=new Date(r.dt);const urgente=dt<=new Date(now.getTime()+3600000);const passado=dt<now;
+      const cor=passado?'var(--re)':urgente?'var(--pb)':'var(--pa)';
+      return'<div class="remind-card'+(urgente||passado?' urgente':'')+'">'+
+        '<div class="remind-ic" style="background:'+(passado?'var(--reb)':urgente?'var(--pbb)':'var(--pab)')+'"><svg viewBox="0 0 24 24" fill="none" stroke="'+cor+'" stroke-width="2" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>'+
+        '<div style="flex:1"><div class="remind-tx">'+r.titulo+'</div>'+
+        '<div class="remind-dt" style="color:'+cor+'">'+dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(passado?' — VENCIDO':'')+'</div>'+
+        (r.desc?'<div class="remind-desc">'+r.desc+'</div>':'')+
+        '</div>'+
+        '<div style="display:flex;gap:4px"><button class="gbtn" onclick="concluirLembrete('+r.id+')">✓</button><button class="rbtn" onclick="deletarLembrete('+r.id+')">✕</button></div>'+
+        '</div>';
+    }).join(''):'<div class="empty">Nenhum lembrete ativo. Crie um novo!</div>')+
+    '</div>'+
+    '<div><div style="font-size:12px;font-weight:600;margin-bottom:12px;color:var(--tx3)">Concluidos ('+feitos.length+')</div>'+
+    (feitos.length?feitos.map(r=>'<div style="background:var(--sf2);border-radius:8px;padding:10px 12px;margin-bottom:6px;opacity:.6"><div style="font-size:11px;font-weight:500;text-decoration:line-through">'+r.titulo+'</div><div style="font-size:9px;color:var(--tx3)">'+new Date(r.dt).toLocaleDateString('pt-BR')+'</div></div>').join(''):'<div style="font-size:11px;color:var(--tx3);padding:12px">Nenhum concluido ainda.</div>')+
+    '</div></div>';
+}
+
+function openNovoLembrete(){
+  document.getElementById('rem-box').innerHTML=
+    '<div class="mhd"><h2 style="font-size:14px;font-weight:600">Novo lembrete</h2><button class="mcl" onclick="closeOv(\'rem-ov\')">Fechar</button></div>'+
+    '<div class="flabel">Titulo *</div><input class="finp" id="rem-titulo" placeholder="Ex: Ligar para Maria...">'+
+    '<div class="flabel">Data e horario *</div><input class="finp" id="rem-dt" type="datetime-local">'+
+    '<div class="flabel">Descricao (opcional)</div><textarea class="notes-area" id="rem-desc" style="min-height:80px" placeholder="Detalhes do lembrete..."></textarea>'+
+    '<button class="gbtn" style="width:100%;margin-top:8px" onclick="salvarLembrete()">Salvar lembrete</button>';
+  document.getElementById('rem-box').querySelector('#rem-dt').value=new Date().toISOString().slice(0,16);
+  document.getElementById('rem-ov').classList.add('open');
+}
+
+function salvarLembrete(){
+  const t=document.getElementById('rem-titulo').value.trim();
+  const d=document.getElementById('rem-dt').value;
+  const desc=document.getElementById('rem-desc').value.trim();
+  if(!t||!d){alert('Preencha titulo e data.');return;}
+  reminders.push({id:Date.now(),titulo:t,dt:new Date(d).toISOString(),desc,done:false,criado:currentUser});
+  savePersist();updateBadges();
+  closeOv('rem-ov');renderView();
+}
+function concluirLembrete(id){const r=reminders.find(x=>x.id===id);if(r)r.done=true;savePersist();updateBadges();renderView();}
+function deletarLembrete(id){reminders=reminders.filter(x=>x.id!==id);savePersist();updateBadges();renderView();}
+
+function checkReminders(){
+  const now=new Date();
+  const venc=reminders.filter(r=>!r.done&&new Date(r.dt)<=now&&!r.shown);
+  venc.forEach(r=>{
+    r.shown=true;
+    document.getElementById('remind-toast-text').textContent=r.titulo;
+    document.getElementById('remind-toast-desc').textContent=r.desc||'';
+    document.getElementById('remind-toast').style.display='block';
+  });
+  if(venc.length)savePersist();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ANIVERSARIANTES
+// ═══════════════════════════════════════════════════════════
+function renderAniversariantes(){
+  const hoje=new Date();
+  const hojeBday=aniversariantes.filter(a=>{const dt=parseDate(a.nascimento);return dt&&dt.getDate()===hoje.getDate()&&dt.getMonth()===hoje.getMonth();});
+  const semana=[];
+  for(let i=1;i<7;i++){const d=new Date(hoje);d.setDate(hoje.getDate()+i);semana.push({d,lista:aniversariantes.filter(a=>{const dt=parseDate(a.nascimento);return dt&&dt.getDate()===d.getDate()&&dt.getMonth()===d.getMonth();})});}
+  function card(a,destaque){
+    const dt=parseDate(a.nascimento);
+    const age=dt?hoje.getFullYear()-dt.getFullYear():0;
+    return'<div class="bday-card"'+(destaque?' style="border-color:var(--am);background:rgba(245,196,0,0.06)"':'')+'>'+
+      '<div class="bday-av">'+ini(a.nome)+'</div>'+
+      '<div><div class="bday-nm">'+a.nome+(destaque?' 🎂':'')+'</div><div class="bday-dt">'+(dt?dt.toLocaleDateString('pt-BR'):'--')+(a.telefone?' · '+a.telefone:'')+'</div></div>'+
+      '<div class="bday-age">'+age+' anos</div>'+
+      '</div>';
+  }
+  document.getElementById('content').innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+    '<h2 style="font-size:14px;font-weight:600">Aniversariantes</h2>'+
+    '<div style="display:flex;gap:8px">'+
+    '<button class="gbtn" onclick="document.getElementById(\'bday-upload-area\').style.display=\'block\'">+ Importar planilha</button>'+
+    '<button class="vbtn" onclick="openNovoBday()">+ Adicionar manual</button></div></div>'+
+    '<div id="bday-upload-area" style="display:none;margin-bottom:14px">'+
+    '<div class="upload-zone" onclick="document.getElementById(\'bday-file\').click()">'+
+    '<input type="file" id="bday-file" accept=".csv,.xlsx,.xls" onchange="importarAniversariantes(this)">'+
+    '<div class="upload-txt">Clique para importar CSV ou Excel com colunas: <b>nome</b>, <b>nascimento</b>, <b>telefone</b></div></div></div>'+
+    (hojeBday.length?'<div class="alert"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'+hojeBday.length+' aniversariante(s) HOJE! 🎂</div>':'')+
+    '<div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--am)">Hoje — '+hoje.toLocaleDateString('pt-BR')+' ('+hojeBday.length+')</div>'+
+    (hojeBday.length?hojeBday.map(a=>card(a,true)).join(''):'<div style="font-size:11px;color:var(--tx3);padding:8px 0">Nenhum aniversariante hoje.</div>')+
+    '<div style="font-size:12px;font-weight:600;margin:14px 0 10px;color:var(--tx2)">Proximos 7 dias</div>'+
+    semana.filter(x=>x.lista.length).map(x=>'<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--tx3);margin-bottom:6px;font-family:DM Mono,monospace">'+x.d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+'</div>'+x.lista.map(a=>card(a,false)).join('')+'</div>').join('')+
+    (aniversariantes.length?'<div style="font-size:12px;font-weight:600;margin:14px 0 10px">Todos os cadastros ('+aniversariantes.length+')</div>'+
+    '<div class="tpanel"><div class="tscroll"><table><thead><tr><th>Nome</th><th>Nascimento</th><th>Idade</th><th>Telefone</th><th></th></tr></thead><tbody>'+
+    aniversariantes.sort((a,b)=>{const da=parseDate(a.nascimento);const db=parseDate(b.nascimento);if(!da||!db)return 0;const ma=da.getMonth()*31+da.getDate();const mb=db.getMonth()*31+db.getDate();const ho=hoje.getMonth()*31+hoje.getDate();return((ma-ho+366)%366)-((mb-ho+366)%366);}).map(a=>{
+      const dt=parseDate(a.nascimento);const age=dt?hoje.getFullYear()-dt.getFullYear():0;
+      const isHoje=dt&&dt.getDate()===hoje.getDate()&&dt.getMonth()===hoje.getMonth();
+      return'<tr'+(isHoje?' style="background:rgba(245,196,0,0.08)"':'')+'>'+
+        '<td style="font-weight:500">'+a.nome+(isHoje?' 🎂':'')+'</td>'+
+        '<td style="font-size:10px;color:var(--tx3);font-family:DM Mono,monospace">'+(dt?dt.toLocaleDateString('pt-BR'):'--')+'</td>'+
+        '<td style="color:var(--am)">'+age+' anos</td>'+
+        '<td style="font-size:10px;color:var(--tx3)">'+(a.telefone||'--')+'</td>'+
+        '<td><button class="rbtn" onclick="deletarBday(\''+a.nome.replace(/'/g,'&#39;')+'\')">✕</button></td></tr>';
+    }).join('')+'</tbody></table></div></div>':'<div class="empty" style="padding:20px">Nenhum aniversariante cadastrado. Importe uma planilha ou adicione manualmente.</div>');
+}
+
+function importarAniversariantes(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      let rows=[];
+      if(file.name.endsWith('.csv')){
+        const lines=e.target.result.split('\n');
+        const headers=lines[0].split(',').map(h=>h.trim().toLowerCase());
+        rows=lines.slice(1).filter(l=>l.trim()).map(l=>{const v=l.split(',');const obj={};headers.forEach((h,i)=>obj[h]=(v[i]||'').trim());return obj;});
+      } else {
+        const wb=XLSX.read(e.target.result,{type:'binary'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+        rows=rows.map(r=>{const obj={};Object.keys(r).forEach(k=>obj[k.toLowerCase().trim()]=String(r[k]).trim());return obj;});
+      }
+      const novos=rows.filter(r=>r.nome).map(r=>({nome:r.nome||'',nascimento:r.nascimento||r['data nascimento']||r['data de nascimento']||'',telefone:r.telefone||r.whatsapp||''}));
+      aniversariantes=[...aniversariantes.filter(a=>!novos.find(n=>n.nome===a.nome)),...novos];
+      savePersist();updateBadges();
+      document.getElementById('bday-upload-area').style.display='none';
+      alert('Importados: '+novos.length+' registros!');
+      renderView();
+    }catch(err){alert('Erro ao importar: '+err.message);}
+  };
+  if(file.name.endsWith('.csv'))reader.readAsText(file);
+  else reader.readAsBinaryString(file);
+}
+
+function openNovoBday(){
+  const nome=prompt('Nome:');if(!nome)return;
+  const nasc=prompt('Data de nascimento (dd/mm/aaaa):');if(!nasc)return;
+  const tel=prompt('Telefone (opcional):');
+  aniversariantes.push({nome:nome.trim(),nascimento:nasc.trim(),telefone:(tel||'').trim()});
+  savePersist();updateBadges();renderView();
+}
+function deletarBday(nome){if(confirm('Remover '+nome+'?')){aniversariantes=aniversariantes.filter(a=>a.nome!==nome);savePersist();renderView();}}
+
+// ═══════════════════════════════════════════════════════════
+// PROFISSIONAIS ATIVAS
+// ═══════════════════════════════════════════════════════════
+function renderAtivas(){
+  document.getElementById('content').innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+    '<h2 style="font-size:14px;font-weight:600">Profissionais Ativas ('+profissionais.length+')</h2>'+
+    '<button class="gbtn" onclick="openNovaProfissional()">+ Nova profissional</button></div>'+
+    (profissionais.length?
+    '<div class="g2">'+profissionais.map((p,i)=>profCard(p,i)).join('')+'</div>':
+    '<div class="empty" style="padding:50px">Nenhuma profissional ativa. Ao aprovar uma candidata e promover para ativa, ela aparece aqui.</div>');
+}
+
+function profCard(p,i){
+  const docs=p.docs||[];
+  return'<div class="prof-card">'+
+    '<div class="prof-hd">'+
+    '<div class="prof-photo" id="pp-'+i+'" onclick="uploadFoto('+i+')" title="Clique para adicionar foto">'+
+    (p.foto?'<img src="'+p.foto+'" alt="foto">':ini(p.nome))+
+    '</div>'+
+    '<div class="prof-info">'+
+    '<div style="display:flex;align-items:center;gap:7px"><div class="prof-nm">'+p.nome+'</div>'+BP('A')+'</div>'+
+    '<div class="prof-meta">'+(p.telefone||'--')+(p.cidade?' · '+p.cidade:'')+'</div>'+
+    '<div class="prof-meta" style="margin-top:2px">Ativa desde: '+(p.desde||'--')+'</div>'+
+    '</div>'+
+    '</div>'+
+    '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">'+
+    '<button class="wbf" onclick="wa(\''+p.telefone+'\',\''+p.nome+'\')">'+WI+' WhatsApp</button>'+
+    '</div>'+
+    '<div class="docs-section">'+
+    '<div style="font-size:10px;font-weight:600;color:var(--tx3);font-family:DM Mono,monospace;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">Documentos ('+(p.docIds||[]).length+')<button class="vbtn" onclick="uploadDocProf('+i+')">+ Anexar</button></div>'+
+    '<div class="prof-docs" id="pcard-docs-'+i+'"><span style="font-size:10px;color:var(--tx3)">Clique em Ver perfil para gerenciar</span></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:6px;margin-top:10px">'+
+    '<button class="gbtn" style="flex:1" onclick="openProfDetail('+i+')">Ver perfil completo</button>'+
+    '<button class="rbtn" onclick="editarProfissional('+i+')">Editar</button>'+
+    '<button style="background:var(--reb);border:none;border-radius:6px;padding:5px 10px;color:var(--re);font-size:10px;cursor:pointer;font-family:DM Sans,sans-serif" onclick="excluirProfissional('+i+')">Excluir</button>'+
+    '</div></div>';
+}
+
+function excluirProfissional(i){
+  if(!confirm('Excluir a profissional '+profissionais[i]?.nome+'? Esta acao nao pode ser desfeita.'))return;
+  profissionais.splice(i,1);
+  savePersist();updateBadges();renderView();
+}
+
+function editarProfissional(i){
+  const p=profissionais[i];if(!p)return;
+  abrirFormProfissional(p, i);
+}
+
+function openNovaProfissional(){
+  abrirFormProfissional(null, -1);
+}
+
+function abrirFormProfissional(p, idx){
+  const isNova = idx===-1;
+  const existing=document.getElementById('prof-form-ov');if(existing)document.body.removeChild(existing);
+  const ov=document.createElement('div');
+  ov.id='prof-form-ov';
+  ov.style='position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:150;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto';
+
+  const opcoesCivil = ['Solteira','Casada','Divorciada','Viuva','Separada'].map(function(o){
+    return '<option'+(p&&p.estadoCivil===o?' selected':'')+'>'+o+'</option>';
+  }).join('');
+
+  const importArea = isNova ?
+    '<div style="margin-top:14px;border-top:1px solid var(--bd);padding-top:12px">' +
+    '<div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Ou importe de planilha (colunas: nome, telefone, cidade, nascimento)</div>' +
+    '<input type="file" id="prof-xls" accept=".csv,.xlsx,.xls" style="display:none" onchange="importarProfissionais(this)">' +
+    '<button onclick="document.getElementById(\'prof-xls\').click()" style="padding:8px 16px;background:var(--sf2);border:1px solid var(--bd2);border-radius:7px;color:var(--tx2);font-size:11px;cursor:pointer;font-family:DM Sans,sans-serif">Importar planilha CSV/Excel</button>' +
+    '</div>' : '';
+
+  const box = document.createElement('div');
+  box.style = 'background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:24px;width:580px;max-width:95vw';
+  box.innerHTML =
+    '<div style="font-size:15px;font-weight:700;margin-bottom:16px">'+(isNova?'Nova Profissional':'Editar — '+(p?p.nome:''))+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+    '<div><div class="flabel">Nome completo *</div><input class="finp" id="pf-nome" value="'+(p?p.nome||'':'')+'" placeholder="Nome completo"></div>'+
+    '<div><div class="flabel">WhatsApp com DDD</div><input class="finp" id="pf-tel" value="'+(p?p.telefone||'':'')+'" placeholder="11999999999"></div>'+
+    '<div><div class="flabel">CPF</div><input class="finp" id="pf-cpf" value="'+(p?p.cpf||'':'')+'" placeholder="000.000.000-00"></div>'+
+    '<div><div class="flabel">RG</div><input class="finp" id="pf-rg" value="'+(p?p.rg||'':'')+'" placeholder="00.000.000-0"></div>'+
+    '<div><div class="flabel">Data de nascimento</div><input class="finp" id="pf-nasc" value="'+(p?p.nascimento||'':'')+'" placeholder="dd/mm/aaaa"></div>'+
+    '<div><div class="flabel">Email</div><input class="finp" id="pf-email" value="'+(p?p.email||'':'')+'" placeholder="email@email.com"></div>'+
+    '<div><div class="flabel">Cidade</div><input class="finp" id="pf-cidade" value="'+(p?p.cidade||'':'')+'" placeholder="Cidade"></div>'+
+    '<div><div class="flabel">CEP</div><input class="finp" id="pf-cep" value="'+(p?p.cep||'':'')+'" placeholder="00000-000"></div>'+
+    '<div><div class="flabel">Bairro</div><input class="finp" id="pf-bairro" value="'+(p?p.bairro||'':'')+'" placeholder="Bairro"></div>'+
+    '<div style="grid-column:span 1"><div class="flabel">Estado civil</div>'+
+    '<select class="finp" id="pf-ecivil" style="padding:8px 10px">'+opcoesCivil+'</select></div>'+
+    '<div style="grid-column:span 2"><div class="flabel">Endereco completo</div><input class="finp" id="pf-end" value="'+(p?p.endereco||'':'')+'" placeholder="Rua, numero, complemento"></div>'+
+    '<div><div class="flabel">Dias disponiveis</div><input class="finp" id="pf-dias" value="'+(p?p.dias||'':'')+'" placeholder="Seg, Ter, Qua..."></div>'+
+    '<div><div class="flabel">Transporte</div><input class="finp" id="pf-transp" value="'+(p?p.transporte||'':'')+'" placeholder="Onibus, Carro..."></div>'+
+    '<div><div class="flabel">Banco</div><input class="finp" id="pf-banco" value="'+(p?p.banco||'':'')+'" placeholder="Nome do banco"></div>'+
+    '<div><div class="flabel">Agencia / Conta</div><input class="finp" id="pf-conta" value="'+(p?p.conta||'':'')+'" placeholder="0000 / 00000-0"></div>'+
+    '<div style="grid-column:span 2"><div class="flabel">Chave PIX</div><input class="finp" id="pf-pix" value="'+(p?p.pix||'':'')+'" placeholder="CPF, telefone ou email"></div>'+
+    '<div><div class="flabel">Ativa desde</div><input class="finp" id="pf-desde" value="'+(p?p.desde||new Date().toLocaleDateString('pt-BR'):new Date().toLocaleDateString('pt-BR'))+'" placeholder="dd/mm/aaaa"></div>'+
+    '<div style="grid-column:span 2"><div class="flabel">Observacoes</div>'+
+    '<textarea class="finp" id="pf-obs" rows="3" placeholder="Observacoes gerais...">'+(p?p.notas||'':'')+'</textarea></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+    '<button onclick="salvarFormProfissional('+idx+')" style="flex:1;padding:10px;background:var(--v);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+(isNova?'Cadastrar profissional':'Salvar alteracoes')+'</button>'+
+    '<button onclick="document.body.removeChild(document.getElementById(\'prof-form-ov\'))" style="padding:10px 16px;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;color:var(--tx2);font-size:13px;cursor:pointer;font-family:DM Sans,sans-serif">Cancelar</button>'+
+    '</div>'+
+    importArea;
+
+  ov.appendChild(box);
+  document.body.appendChild(ov);
+  ov.onclick=function(e){if(e.target===ov)document.body.removeChild(ov);};
+}
+
+function salvarFormProfissional(idx){
+  const get=id=>document.getElementById(id)?.value?.trim()||'';
+  const nome=get('pf-nome');if(!nome){alert('Nome obrigatorio.');return;}
+  const prof={
+    nome, telefone:get('pf-tel'), cpf:get('pf-cpf'), rg:get('pf-rg'),
+    nascimento:get('pf-nasc'), cidade:get('pf-cidade'), cep:get('pf-cep'),
+    bairro:get('pf-bairro'), endereco:get('pf-end'), email:get('pf-email'),
+    estadoCivil:get('pf-ecivil'), dias:get('pf-dias'), transporte:get('pf-transp'),
+    banco:get('pf-banco'), conta:get('pf-conta'), pix:get('pf-pix'),
+    desde:get('pf-desde'), notas:get('pf-obs'),
+  };
+  if(idx===-1){
+    prof.docs=[]; prof.docIds=[]; prof.foto=''; prof.sig=''; prof.sigDate='';
+    profissionais.push(prof);
+  } else {
+    profissionais[idx]={...profissionais[idx],...prof};
+  }
+  savePersist();updateBadges();
+  const ov=document.getElementById('prof-form-ov');if(ov)document.body.removeChild(ov);
+  renderView();
+}
+
+function importarProfissionais(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      let rows=[];
+      if(file.name.endsWith('.csv')){
+        const lines=e.target.result.split('\n');
+        const hds=lines[0].split(',').map(h=>h.trim().toLowerCase());
+        rows=lines.slice(1).filter(l=>l.trim()).map(l=>{const v=l.split(',');const o={};hds.forEach((h,i)=>o[h]=(v[i]||'').trim());return o;});
+      } else {
+        const wb=XLSX.read(e.target.result,{type:'binary'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+        rows=rows.map(r=>{const o={};Object.keys(r).forEach(k=>o[k.toLowerCase().trim()]=String(r[k]).trim());return o;});
+      }
+      let count=0;
+      rows.filter(r=>r.nome).forEach(r=>{
+        if(!profissionais.find(p=>p.nome===r.nome)){
+          profissionais.push({nome:r.nome,telefone:r.telefone||r.whatsapp||'',cidade:r.cidade||'',nascimento:r.nascimento||r['data nascimento']||'',desde:new Date().toLocaleDateString('pt-BR'),docs:[],docIds:[],foto:'',sig:'',notas:''});
+          count++;
+        }
+      });
+      savePersist();updateBadges();
+      alert(count+' profissionais importadas!');
+      const ov=document.getElementById('prof-form-ov');if(ov)document.body.removeChild(ov);
+      renderView();
+    }catch(err){alert('Erro ao importar: '+err.message);}
+  };
+  if(file.name.endsWith('.csv'))reader.readAsText(file);
+  else reader.readAsBinaryString(file);
+}
+
+
+function uploadFoto(i){
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    if(f.size>5*1024*1024){alert('Foto muito grande. Maximo 5MB.');return;}
+    const reader=new FileReader();
+    reader.onload=ev=>{profissionais[i].foto=ev.target.result;savePersist();renderView();};
+    reader.readAsDataURL(f);
+  };inp.click();
+}
+
+function uploadDocProf(i){
+  const nome=prompt('Nome para o documento (ex: RG, CPF, Foto, Contrato...):');if(nome===null)return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*,.pdf,.xlsx,.xls,.csv,.doc,.docx,.txt,.png,.jpg,.jpeg';
+  inp.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    if(f.size>30*1024*1024){alert('Arquivo muito grande. Maximo 30MB por arquivo.');return;}
+    const reader=new FileReader();
+    reader.onload=async ev=>{
+      const id='pdoc_'+Date.now()+'_'+i;
+      const docObj={id,profIdx:i,nome:(nome||f.name).trim(),tipo:f.type,tamanho:(f.size/1024).toFixed(0)+'KB',data:new Date().toLocaleDateString('pt-BR'),data64:ev.target.result};
+      await dbPut('docs',docObj);
+      // atualizar lista de IDs no profissional
+      profissionais[i].docIds=profissionais[i].docIds||[];
+      profissionais[i].docIds.push(id);
+      savePersist();
+      alert('Documento "'+docObj.nome+'" anexado com sucesso!');
+      openProfDetail(i);
+    };
+    reader.readAsDataURL(f);
+  };inp.click();
+}
+
+async function viewDoc(docId){
+  const doc=await dbGet('docs',docId);if(!doc)return;
+  const w=window.open('');
+  if(doc.tipo&&doc.tipo.startsWith('image/')){w.document.write('<html><body style="margin:0;background:#111"><img src="'+doc.data64+'" style="max-width:100%;display:block"></body></html>');}
+  else if(doc.tipo==='application/pdf'){w.document.write('<html><body style="margin:0"><embed src="'+doc.data64+'" width="100%" height="100%" type="application/pdf" style="height:100vh"></body></html>');}
+  else{w.document.write('<html><body style="font-family:sans-serif;padding:20px"><h3>'+doc.nome+'</h3><a href="'+doc.data64+'" download="'+doc.nome+'" style="font-size:14px">Clique para baixar</a></body></html>');}
+}
+
+function openProfDetail(i){
+  const p=profissionais[i];if(!p)return;
+  const nota=p.notas||'';
+  document.getElementById('prof-box').innerHTML=
+    '<div class="mhd">'+
+    '<div style="display:flex;align-items:center;gap:12px">'+
+    '<div style="width:52px;height:52px;border-radius:14px;background:var(--v2);overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--am);border:2px solid var(--bd2)" onclick="uploadFoto('+i+')">'+
+    (p.foto?'<img src="'+p.foto+'" style="width:100%;height:100%;object-fit:cover">':ini(p.nome))+'</div>'+
+    '<div><div style="font-size:15px;font-weight:700">'+p.nome+'</div>'+
+    '<div style="font-size:11px;color:var(--tx3)">'+(p.telefone||'--')+(p.cidade?' · '+p.cidade:'')+'</div>'+
+    '<div style="font-size:10px;color:var(--tx3);margin-top:2px">Ativa desde: '+(p.desde||'--')+'</div></div></div>'+
+    '<div class="macts"><button class="wbf" onclick="wa(\''+p.telefone+'\')">'+WI+' WhatsApp</button>'+
+    '<button class="vbtn" onclick="uploadDocProf('+i+')">+ Documento</button>'+
+    '<button class="pbtn" onclick="imprimirProfissional('+i+')"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir</button>'+
+    '<button class="mcl" onclick="closeOv(\'prof-ov\')">Fechar</button></div></div>'+
+
+    '<div class="dg">'+
+    '<div class="di"><div class="dil">WhatsApp</div><div class="div">'+(p.telefone||'--')+'</div></div>'+
+    '<div class="di"><div class="dil">Cidade</div><div class="div">'+(p.cidade||'--')+'</div></div>'+
+    '<div class="di full"><div class="dil">Anotacoes / Observacoes</div>'+
+    '<textarea class="notes-area" style="min-height:120px" id="prof-notas-'+i+'" onchange="salvarNotaProf('+i+')">'+nota+'</textarea>'+
+    '</div>'+
+    '<div class="di full"><div class="dil" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">Documentos <button class="vbtn" onclick="uploadDocProf('+i+')">+ Anexar (PDF, imagem, planilha, print...)</button></div>'+
+    '<div id="pdocs-list-'+i+'" style="min-height:40px"><div style="font-size:11px;color:var(--tx3);padding:8px">Carregando...</div></div>'+
+    '</div></div></div>'+
+
+    '<div style="margin-top:12px"><div style="font-size:10px;font-weight:600;color:var(--tx2);font-family:DM Mono,monospace;text-transform:uppercase;margin-bottom:8px">Assinatura eletronica do contrato</div>'+
+    (p.sig?'<div style="background:var(--sf2);border-radius:8px;padding:10px;text-align:center"><img src="'+p.sig+'" style="max-height:80px;border-radius:4px"><div style="font-size:10px;color:var(--tx3);margin-top:4px">Assinatura registrada · '+p.sigDate+'</div></div><button class="vbtn" style="margin-top:6px" onclick="abrirAssinatura('+i+')">Reassinar</button>':
+    '<button class="blubtn" onclick="abrirAssinatura('+i+')" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Assinar contrato eletronicamente</button>')+
+    '</div>'+
+
+    '<div style="margin-top:12px"><div style="font-size:10px;font-weight:600;color:var(--tx2);font-family:DM Mono,monospace;text-transform:uppercase;margin-bottom:8px">Analise de documento Truora (IA)</div>'+
+    '<div style="margin-bottom:8px"><input type="file" id="truora-file-'+i+'" accept="image/*,.pdf" style="display:none" onchange="analisarTruora(this,'+i+')">'+
+    '<button class="pupbtn" onclick="document.getElementById(\'truora-file-'+i+'\').click()" style="width:100%;justify-content:center"><svg viewBox="0 0 24 24" stroke-width="2" width="13" height="13"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Anexar e Analisar documento Truora com IA</button>'+
+    '</div><div id="truora-result-'+i+'"></div></div>';
+
+  document.getElementById('prof-ov').classList.add('open');
+  setTimeout(()=>renderProfDocs(i),100);
+}
+
+async function renderProfDocs(i){
+  const el=document.getElementById('pdocs-list-'+i);if(!el)return;
+  const p=profissionais[i];if(!p)return;
+  const ids=(p.docIds||[]);
+  if(!ids.length){el.innerHTML='<div style="font-size:11px;color:var(--tx3);padding:8px">Nenhum documento anexado. Clique em + Anexar para adicionar PDFs, imagens, planilhas, prints...</div>';return;}
+  const docs=[];
+  for(const id of ids){const d=await dbGet('docs',id);if(d)docs.push(d);}
+  el.innerHTML=docs.length?docs.map(d=>{
+    const tipo=d.tipo||'';
+    const tipoCls=tipo.includes('pdf')?'doc-pdf':tipo.startsWith('image/')?'doc-img':tipo.includes('sheet')||tipo.includes('excel')?'doc-xls':'doc-gen';
+    const tipoLabel=tipo.includes('pdf')?'PDF':tipo.startsWith('image/')?'IMG':tipo.includes('sheet')||tipo.includes('excel')?'XLS':'DOC';
+    return '<div class="doc-row"><div class="doc-icon '+tipoCls+'">'+tipoLabel+'</div>'+
+    '<div class="doc-nm">'+d.nome+'</div><div class="doc-sz">'+d.tamanho+'</div><div class="doc-date">'+d.data+'</div>'+
+    '<button class="vbtn" data-id="'+d.id+'" onclick="viewDoc(this.dataset.id)">Abrir</button>'+
+    '<button class="rbtn" data-pi="'+i+'" data-id="'+d.id+'" onclick="deletarDocProf(parseInt(this.dataset.pi),this.dataset.id)">✕</button></div>';
+  }).join(''):'<div style="font-size:11px;color:var(--tx3);padding:8px">Nenhum documento encontrado.</div>';
+}
+
+function salvarNotaProf(i){
+  const el=document.getElementById('prof-notas-'+i);
+  if(el)profissionais[i].notas=el.value;
+  savePersist();
+}
+
+async function deletarDocProf(pi,docId){
+  if(confirm('Remover documento?')){
+    await dbDel('docs',docId);
+    profissionais[pi].docIds=(profissionais[pi].docIds||[]).filter(x=>x!==docId);
+    savePersist();openProfDetail(pi);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ASSINATURA ELETRÔNICA
+// ═══════════════════════════════════════════════════════════
+let sigCanvas=null,sigCtx=null,sigDrawing=false,sigPI=-1;
+function abrirAssinatura(i){
+  sigPI=i;
+  const box=document.createElement('div');
+  box.style='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px';
+  box.id='sig-overlay';
+  box.innerHTML='<div style="background:var(--sf);border-radius:14px;padding:22px;width:520px"><div style="font-size:14px;font-weight:600;margin-bottom:12px">Assinatura Eletronica</div>'+
+    '<canvas id="sig-cv" width="476" height="160" class="sig-canvas"></canvas>'+
+    '<div class="sig-hint">Assine com o mouse ou dedo no espaco acima</div>'+
+    '<div style="display:flex;gap:8px;margin-top:12px">'+
+    '<button class="gbtn" onclick="salvarAssinatura()">Confirmar assinatura</button>'+
+    '<button class="vbtn" onclick="limparAssinatura()">Limpar</button>'+
+    '<button class="mcl" onclick="document.body.removeChild(document.getElementById(\'sig-overlay\'))">Cancelar</button>'+
+    '</div></div>';
+  document.body.appendChild(box);
+  sigCanvas=document.getElementById('sig-cv');
+  sigCtx=sigCanvas.getContext('2d');
+  sigCtx.fillStyle='#fff';sigCtx.fillRect(0,0,sigCanvas.width,sigCanvas.height);
+  sigCtx.strokeStyle='#1B6B3A';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';
+  const ev=(e,type)=>{
+    const r=sigCanvas.getBoundingClientRect();
+    const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+    if(type==='down'){sigDrawing=true;sigCtx.beginPath();sigCtx.moveTo(x,y);}
+    else if(type==='move'&&sigDrawing){sigCtx.lineTo(x,y);sigCtx.stroke();}
+    else if(type==='up'){sigDrawing=false;}
+  };
+  sigCanvas.addEventListener('mousedown',e=>ev(e,'down'));
+  sigCanvas.addEventListener('mousemove',e=>ev(e,'move'));
+  sigCanvas.addEventListener('mouseup',e=>ev(e,'up'));
+  sigCanvas.addEventListener('touchstart',e=>{e.preventDefault();ev(e,'down');});
+  sigCanvas.addEventListener('touchmove',e=>{e.preventDefault();ev(e,'move');});
+  sigCanvas.addEventListener('touchend',e=>ev(e,'up'));
+}
+function limparAssinatura(){if(sigCtx){sigCtx.fillStyle='#fff';sigCtx.fillRect(0,0,sigCanvas.width,sigCanvas.height);}}
+function salvarAssinatura(){
+  if(sigPI<0||!sigCanvas)return;
+  profissionais[sigPI].sig=sigCanvas.toDataURL('image/png');
+  profissionais[sigPI].sigDate=new Date().toLocaleString('pt-BR');
+  savePersist();
+  const ov=document.getElementById('sig-overlay');if(ov)document.body.removeChild(ov);
+  openProfDetail(sigPI);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ANÁLISE TRUORA (IA)
+// ═══════════════════════════════════════════════════════════
+async function analisarTruora(input,pi){
+  const file=input.files[0];if(!file)return;
+  const res=document.getElementById('truora-result-'+pi);
+  
+  // Verificar/pedir chave API
+  let apiKey=localStorage.getItem('mb_api_key')||'';
+  if(!apiKey){
+    apiKey=prompt('Para usar a analise de IA, informe sua chave da API Anthropic (claude.ai):\n\nObtanha em: console.anthropic.com\nA chave inicia com sk-ant-...');
+    if(!apiKey)return;
+    localStorage.setItem('mb_api_key',apiKey);
+  }
+  
+  res.innerHTML='<div class="truora-result truora-loading"><div style="display:flex;align-items:center;gap:8px"><div style="width:14px;height:14px;border:2px solid #9ab5a3;border-top-color:var(--v);border-radius:50%;animation:sp .7s linear infinite"></div>Analisando documento com IA... aguarde.</div></div>';
+  
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const b64=e.target.result.split(',')[1];
+    const isImg=file.type.startsWith('image/');
+    try{
+      const content=[
+        isImg
+          ?{type:'image',source:{type:'base64',media_type:file.type,data:b64}}
+          :{type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},
+        {type:'text',text:'Voce e um especialista em analise de antecedentes para contratacao no mercado de trabalho domestico brasileiro (diaristas, faxineiras).\n\nAnalise este documento Truora (verificacao de antecedentes) e forneça uma analise estruturada:\n\n**1. RESUMO DO DOCUMENTO**\nDescreva o que foi encontrado.\n\n**2. OCORRENCIAS ENCONTRADAS**\nListe cada item encontrado, mesmo que positivo (certidao limpa).\n\n**3. PONTOS DE ATENCAO**\nDestaque ocorrencias preocupantes com contexto.\n\n**4. RISCO: BAIXO / MEDIO / ALTO**\nClassifique com justificativa.\n\n**5. RECOMENDACAO FINAL**\nAPROVAR, APROVAR COM RESSALVAS ou REPROVAR — com justificativa clara considerando seguranca para clientes.\n\nSeja objetivo. Se o documento estiver ilegivel ou nao for um Truora, informe.'}
+      ];
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-opus-4-5',max_tokens:1000,messages:[{role:'user',content}]})
+      });
+      if(!r.ok){
+        const err=await r.json().catch(()=>({}));
+        if(r.status===401){localStorage.removeItem('mb_api_key');throw new Error('Chave API invalida. Tente novamente.');}
+        throw new Error('Erro API: '+(err.error?.message||r.status));
+      }
+      const data=await r.json();
+      const txt=(data.content||[]).map(x=>x.text||'').join('');
+      const isBad=/reprovar|alto risco|REPROVAR/i.test(txt);
+      const isWarn=/ressalva|medio|atencao|MEDIO/i.test(txt);
+      res.innerHTML='<div class="truora-result '+(isBad?'truora-bad':isWarn?'truora-warn':'truora-ok')+'" style="white-space:pre-wrap;font-size:12px;line-height:1.7">'+txt+'</div>';
+    }catch(err){
+      res.innerHTML='<div class="truora-result truora-bad" style="font-size:12px">Erro ao analisar: '+err.message+'<br><button onclick="localStorage.removeItem(String.fromCharCode(109,98,95,97,112,105,95,107,101,121));this.parentNode.innerHTML=String.fromCharCode(67,104,97,118,101,32,114,101,109,111,118,105,100,97)" style="margin-top:6px;background:var(--sf3);border:none;border-radius:5px;padding:4px 10px;color:var(--tx2);font-size:10px;cursor:pointer">Redefinir chave</button></div>';
+    }
+  };
+  if(isImg||file.type==='application/pdf')reader.readAsDataURL(file);
+  else{res.innerHTML='<div class="truora-result truora-warn">Formato nao suportado. Envie imagem ou PDF.</div>';}
+}
+
+// ═══════════════════════════════════════════════════════════
+// RELATÓRIOS
+// ═══════════════════════════════════════════════════════════
+function renderRelatorios(){
+  const relatorios=[
+    {ic:'📊',cor:'rgba(59,130,246,0.15)',nm:'Relatorio Geral de Candidatas',desc:'Todas as candidatas com perfil, status, score e dias no status.',fn:'relGeralCandidatas'},
+    {ic:'🏆',cor:'rgba(34,197,94,0.15)',nm:'Relatorio de Aprovadas',desc:'Candidatas aprovadas com dados completos para onboarding.',fn:'relAprovadas'},
+    {ic:'📈',cor:'rgba(245,196,0,0.15)',nm:'Relatorio de Producao RH',desc:'Movimentacoes por recrutadora, aprovadas, reprovadas e tempo medio.',fn:'relProducao'},
+    {ic:'⏰',cor:'rgba(239,68,68,0.15)',nm:'Relatorio de Tempo no Status',desc:'Candidatas com mais de X dias em cada status — alertas de producao.',fn:'relTempo'},
+    {ic:'🎯',cor:'rgba(167,139,250,0.15)',nm:'Relatorio de Conversao por Perfil',desc:'Taxa de conversao A, B, C — quanto cada perfil se torna parceira.',fn:'relConversao'},
+    {ic:'📍',cor:'rgba(249,115,22,0.15)',nm:'Relatorio por Cidade',desc:'Distribuicao de candidatas por cidade com taxas de aprovacao.',fn:'relCidade'},
+    {ic:'📅',cor:'rgba(27,107,58,0.15)',nm:'Relatorio Mensal',desc:'Resumo do mes selecionado: cadastros, aprovadas, reprovadas.',fn:'relMensal'},
+    {ic:'🔴',cor:'rgba(239,68,68,0.15)',nm:'Relatorio de Risco — Status Parado',desc:'Candidatas Perfil A sem movimentacao ha mais de 2 dias.',fn:'relRisco'},
+  ];
+  document.getElementById('content').innerHTML=
+    '<div style="margin-bottom:16px"><div style="font-size:14px;font-weight:600;margin-bottom:4px">Central de Relatorios</div><div style="font-size:11px;color:var(--tx3)">Gere relatorios completos para analise, tomada de decisao e auditoria.</div></div>'+
+    '<div class="g4">'+relatorios.map(r=>'<div class="rel-card" onclick="gerarRelatorio(\''+r.fn+'\')"><div class="rel-ic" style="background:'+r.cor+'"><span style="font-size:18px">'+r.ic+'</span></div><div class="rel-nm">'+r.nm+'</div><div class="rel-desc">'+r.desc+'</div><div style="margin-top:8px;font-size:10px;color:var(--bl)">Clique para gerar e imprimir →</div></div>').join('')+'</div>';
+}
+
+function gerarRelatorio(fn){
+  const titulo={relGeralCandidatas:'Relatorio Geral de Candidatas',relAprovadas:'Relatorio — Candidatas Aprovadas',relProducao:'Relatorio de Producao RH',relTempo:'Relatorio — Tempo no Status',relConversao:'Relatorio — Conversao por Perfil',relCidade:'Relatorio por Cidade',relMensal:'Relatorio Mensal',relRisco:'Relatorio de Risco — Candidatas Paradas'}[fn]||'Relatorio';
+  let rows=[];
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  if(fn==='relGeralCandidatas'||fn==='relMensal'){rows=filtered;}
+  else if(fn==='relAprovadas'){rows=allData.filter(c=>getStatus(c)==='Aprovada');}
+  else if(fn==='relTempo'){rows=allData.filter(c=>diasNoStatus(c)>=2);}
+  else if(fn==='relRisco'){rows=allData.filter(c=>getStatus(c)==='Nova'&&c['Perfil']==='A'&&diasNoStatus(c)>=2);}
+  else if(fn==='relCidade'||fn==='relConversao'){rows=allData;}
+
+  const header='<div style="font-family:Arial,sans-serif;padding:24px;color:#111">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #1B6B3A;padding-bottom:12px;margin-bottom:16px">'+
+    '<div><div style="font-size:20px;font-weight:700">Maria Brasileira</div><div style="font-size:14px;color:#555">'+titulo+'</div></div>'+
+    '<div style="text-align:right"><div style="font-size:11px;color:#888">Gerado em: '+hoje+'</div><div style="font-size:11px;color:#888">Por: '+currentUser+'</div><div style="font-size:11px;color:#888">Total: '+rows.length+' registros</div></div></div>';
+
+  let body='';
+  if(fn==='relProducao'){
+    const usuarios=[...new Set(statusLog.map(l=>l.usuario).filter(Boolean))];
+    body='<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+      '<thead><tr style="background:#f0f0f0"><th style="padding:8px;text-align:left;border:1px solid #ddd">Recrutadora</th><th style="padding:8px;text-align:center;border:1px solid #ddd">Total</th><th style="padding:8px;text-align:center;border:1px solid #ddd">Aprovadas</th><th style="padding:8px;text-align:center;border:1px solid #ddd">Reprovadas</th><th style="padding:8px;text-align:center;border:1px solid #ddd">N. conseguiu</th><th style="padding:8px;text-align:center;border:1px solid #ddd">Taxa conv.</th></tr></thead>'+
+      '<tbody>'+usuarios.map(u=>{const logs=statusLog.filter(l=>l.usuario===u);const ap=logs.filter(l=>l.para==='Aprovada').length;const rp=logs.filter(l=>l.para==='Reprovada').length;const ncc=logs.filter(l=>l.para==='Nao consegui contato').length;return'<tr><td style="padding:8px;border:1px solid #ddd;font-weight:600">'+u+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center">'+logs.length+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#16a34a">'+ap+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#dc2626">'+rp+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#f97316">'+ncc+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center">'+(logs.length?Math.round(ap/logs.length*100):0)+'%</td></tr>';}).join('')+'</tbody></table>';
+  } else if(fn==='relConversao'){
+    ['A','B','C'].forEach(p=>{const list=allData.filter(c=>c['Perfil']===p);const ap=list.filter(c=>getStatus(c)==='Aprovada').length;body+='<div style="margin-bottom:12px;padding:12px;background:#f9f9f9;border-radius:8px"><div style="font-size:14px;font-weight:700">Perfil '+p+' — '+list.length+' candidatas</div><div style="font-size:12px;margin-top:4px">Aprovadas: <b>'+ap+'</b> ('+( list.length?Math.round(ap/list.length*100):0)+'%)</div></div>';});
+  } else if(fn==='relCidade'){
+    const cidades=[...new Set(allData.map(c=>c['Cidade Interesse']).filter(Boolean))];
+    body='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f0f0f0"><th style="padding:8px;text-align:left;border:1px solid #ddd">Cidade</th><th style="padding:8px;text-align:center;border:1px solid #ddd">Total</th><th style="padding:8px;text-align:center;border:1px solid #ddd">Perfil A</th><th style="padding:8px;text-align:center;border:1px solid #ddd">Aprovadas</th><th style="padding:8px;text-align:center;border:1px solid #ddd">Taxa</th></tr></thead><tbody>'+cidades.map(ci=>{const list=allData.filter(c=>c['Cidade Interesse']===ci);const a=list.filter(c=>c['Perfil']==='A').length;const ap=list.filter(c=>getStatus(c)==='Aprovada').length;return'<tr><td style="padding:8px;border:1px solid #ddd;font-weight:600">'+ci+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center">'+list.length+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#16a34a">'+a+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center">'+ap+'</td><td style="padding:8px;border:1px solid #ddd;text-align:center">'+(list.length?Math.round(ap/list.length*100):0)+'%</td></tr>';}).join('')+'</tbody></table>';
+  } else {
+    body='<table style="width:100%;border-collapse:collapse;font-size:11px">'+
+      '<thead><tr style="background:#f0f0f0">'+
+      '<th style="padding:6px 8px;text-align:left;border:1px solid #ddd">Nome</th><th style="padding:6px 8px;border:1px solid #ddd">Perfil</th><th style="padding:6px 8px;border:1px solid #ddd">Cidade</th><th style="padding:6px 8px;border:1px solid #ddd">Status</th><th style="padding:6px 8px;border:1px solid #ddd">Dias</th><th style="padding:6px 8px;border:1px solid #ddd">Cadastro</th><th style="padding:6px 8px;border:1px solid #ddd">WhatsApp</th></tr></thead>'+
+      '<tbody>'+rows.map(c=>'<tr><td style="padding:6px 8px;border:1px solid #ddd;font-weight:600">'+(c['Nome']||'--')+'</td><td style="padding:6px 8px;border:1px solid #ddd;text-align:center;color:'+({'A':'#16a34a','B':'#d97706','C':'#ea580c'}[c['Perfil']]||'#555')+'">'+c['Perfil']+'</td><td style="padding:6px 8px;border:1px solid #ddd">'+(c['Cidade Interesse']||'--')+'</td><td style="padding:6px 8px;border:1px solid #ddd">'+getStatus(c)+'</td><td style="padding:6px 8px;border:1px solid #ddd;text-align:center">'+diasNoStatus(c)+'d</td><td style="padding:6px 8px;border:1px solid #ddd">'+(c['Data Cadastro']||'--')+'</td><td style="padding:6px 8px;border:1px solid #ddd">'+(c['WhatsApp']||'--')+'</td></tr>').join('')+'</tbody></table>';
+  }
+
+  const footer='<div style="margin-top:20px;text-align:center;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px">Maria Brasileira · Dashboard RH · '+hoje+' · Gerado por: '+currentUser+'</div></div>';
+  const pa=document.getElementById('pa');pa.innerHTML=header+body+footer;pa.style.display='block';
+  window.print();setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},800);
+}
+
+// ═══════════════════════════════════════════════════════════
+// DETALHE CANDIDATA
+// ═══════════════════════════════════════════════════════════
+function openDet(whats){
+  const c=allData.find(x=>(x['WhatsApp']||'').replace(/['"]/g,'')===whats);
+  if(!c)return;
+  const w=(c['WhatsApp']||'').replace(/['"]/g,'');
+  const st=getStatus(c);
+  const dias=(c['Dias Disponíveis']||c['Dias Disponiveis']||'--').split(',').map(d=>d.trim()).join(' · ');
+  const clog=statusLog.filter(l=>l.whats===c['WhatsApp']).slice(0,10);
+  const nota=notesStorage[w]||'';
+  const di=(l,v)=>'<div class="di"><div class="dil">'+l+'</div><div class="div">'+(v||'--')+'</div></div>';
+  const dif=(l,v)=>'<div class="di full"><div class="dil">'+l+'</div><div class="div">'+(v||'--')+'</div></div>';
+  document.getElementById('det-box').innerHTML=
+    '<div class="mhd"><div style="display:flex;align-items:center;gap:10px">'+
+    '<div class="mav">'+ini(c['Nome'])+'</div>'+
+    '<div><div style="font-size:14px;font-weight:700">'+(c['Nome']||'--')+'</div>'+
+    '<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(c['Cidade Interesse']||'--')+' · Cadastro: '+(c['Data Cadastro']||'--')+'</div>'+
+    '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">'+BP(c['Perfil'])+' '+BS(st)+' '+diasBadge(c)+'</div></div></div>'+
+    '<div class="macts">'+
+    '<button class="wbf" onclick="wa(\''+w+'\')">'+WI+' WhatsApp</button>'+
+    '<button class="pbtn" onclick="imprimirCard(\''+w+'\')"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir</button>'+
+    '<button class="mcl" onclick="closeOv(\'det-ov\')">Fechar</button></div></div>'+
+
+    '<div class="dg">'+
+    di('WhatsApp',c['WhatsApp'])+di('Nascimento',c['Data Nascimento'])+
+    di('CEP / Bairro',(c['CEP']||'--')+' · '+(c['Bairro']||'--'))+di('Endereco',(c['Rua']||'--')+', '+(c['Numero']||c['Número']||'--')+' — '+(c['Cidade']||'--'))+
+    dif('Bairros para atendimento',c['Bairros p/ Atendimento'])+
+    di('Transporte',c['Transporte'])+di('Dias disponíveis',dias)+
+    di('Exp. Residencias',c['Exp. Residencias']||c['Exp. Residências'])+di('Ref. Residencias',c['Ref. Residencias']||c['Ref. Residências'])+
+    di('Exp. Empresarial',c['Exp. Empresarial'])+di('Ref. Empresarial',c['Ref. Empresarial'])+
+    di('Fumante',c['Fumante'])+di('Alergia/Pet',c['Alergia/Pet'])+
+    di('Alergia Produto',c['Alergia Produto Limp.'])+di('Remedio Controlado',c['Remedio Controlado']||c['Remédio Controlado'])+
+    di('Dor no Corpo',c['Dor no Corpo'])+di('Carteira Assinada',c['Carteira Assinada'])+
+    di('Estado Civil',c['Estado Civil'])+di('Filhos',(c['Filhos']||'--')+(c['Situacao dos Filhos']||c['Situação dos Filhos']?' · '+(c['Situacao dos Filhos']||c['Situação dos Filhos']):''))+
+    dif('Motivacao',c['Motivacao']||c['Motivação'])+
+    '<div class="di full"><div class="dil">Alterar status</div><div class="str">'+ALL_STATUS.map(s=>'<button class="sbtn'+(st===s?' active':'')+'" onclick="setStatus(\''+w+'\',\''+s+'\');openDet(\''+w+'\')">'+s+'</button>').join('')+'</div></div>'+
+    '</div>'+
+
+    '<div class="recb"><div class="rect">Recomendacao de perfil</div><div class="recv">'+rec(c)+'</div></div>'+
+
+    '<div style="margin-top:12px"><div style="font-size:10px;font-weight:600;color:var(--tx2);font-family:DM Mono,monospace;text-transform:uppercase;margin-bottom:6px">Anotacoes da entrevista</div>'+
+    '<textarea class="notes-area" id="notes-'+w+'" onchange="salvarNota(\''+w+'\')" placeholder="Anote observacoes da entrevista, impressoes, pontos de atencao...">'+nota+'</textarea>'+
+    '</div>'+
+
+    '<div class="docs-section"><div style="font-size:10px;font-weight:600;color:var(--tx2);font-family:DM Mono,monospace;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">Documentos anexados <button class="vbtn" onclick="uploadDocCand(\''+w+'\')">+ Anexar (PDF, imagem, planilha...)</button></div>'+
+    '<div id="doc-list-'+w+'"></div></div>'+
+
+    (clog.length?'<div class="lgs"><h3>Historico de movimentacoes</h3>'+clog.map(l=>'<div class="lgi"><div class="lgd" style="background:'+(S_COR[l.para]||'#888')+'"></div><div><div class="lgtx"><b>'+l.usuario+'</b> moveu de '+BS(l.de)+' para '+BS(l.para)+'</div><div class="lgtm">'+fmtDt(l.ts)+'</div></div></div>').join('')+'</div>':'');
+
+  document.getElementById('det-ov').classList.add('open');
+  renderDocsCand(w);
+}
+
+function salvarNota(w){
+  const el=document.getElementById('notes-'+w);
+  if(el){notesStorage[w]=el.value;savePersist();}
+}
+
+async function renderDocsCand(w){
+  const all=await dbGetAll('docs');
+  const docs=all.filter(d=>d.whats===w);
+  const el=document.getElementById('doc-list-'+w);if(!el)return;
+  el.innerHTML=docs.length?
+    docs.map(d=>'<div class="doc-row"><div class="doc-icon '+(d.tipo&&d.tipo.includes('pdf')?'doc-pdf':d.tipo&&d.tipo.startsWith('image/')?'doc-img':'doc-gen')+'">'+(d.tipo&&d.tipo.includes('pdf')?'PDF':d.tipo&&d.tipo.startsWith('image/')?'IMG':'DOC')+'</div>'+
+    '<div class="doc-nm">'+d.nome+'</div><div class="doc-sz">'+d.tamanho+'</div><div class="doc-date">'+d.dataAdic+'</div>'+
+    '<button class="vbtn" onclick="abrirDocCand(\''+d.id+'\')">Abrir</button>'+
+    '<button class="rbtn" onclick="deletarDocCand(\''+d.id+'\',\''+w+'\')">✕</button></div>').join(''):
+    '<div style="font-size:11px;color:var(--tx3);padding:8px">Nenhum documento. Clique em + Anexar para adicionar PDF, imagens, prints de conversa, planilhas...</div>';
+}
+
+function uploadDocCand(w){
+  const nome=prompt('Nome para este documento:');if(nome===null)return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*,.pdf,.xlsx,.xls,.csv,.doc,.docx,.txt';
+  inp.onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    if(f.size>30*1024*1024){alert('Arquivo muito grande. Maximo 30MB.');return;}
+    const reader=new FileReader();
+    reader.onload=async ev=>{
+      const id='doc_'+Date.now();
+      await dbPut('docs',{id,whats:w,nome:(nome||f.name).trim(),tipo:f.type,tamanho:(f.size/1024).toFixed(0)+'KB',dataAdic:new Date().toLocaleDateString('pt-BR'),data64:ev.target.result});
+      renderDocsCand(w);
+      alert('Documento "'+( nome||f.name)+'" anexado com sucesso!');
+    };
+    reader.readAsDataURL(f);
+  };inp.click();
+}
+
+async function abrirDocCand(id){
+  const doc=await dbGet('docs',id);if(!doc)return;
+  const win=window.open('');
+  if(doc.tipo&&doc.tipo.startsWith('image/')){win.document.write('<html><body style="margin:0;background:#111"><img src="'+doc.data64+'" style="max-width:100%;display:block"></body></html>');}
+  else if(doc.tipo==='application/pdf'){win.document.write('<html><body style="margin:0"><embed src="'+doc.data64+'" width="100%" height="100%" type="application/pdf" style="height:100vh"></body></html>');}
+  else{win.document.write('<html><body><p>'+doc.nome+'</p><a href="'+doc.data64+'" download="'+doc.nome+'">Baixar arquivo</a></body></html>');}
+}
+
+async function deletarDocCand(id,w){
+  if(confirm('Remover documento?')){await dbDel('docs',id);renderDocsCand(w);}
+}
+
+// ═══════════════════════════════════════════════════════════
+// IMPRESSÃO CANDIDATA (corrigida — 1 página)
+// ═══════════════════════════════════════════════════════════
+function imprimirCard(whats){
+  const c=allData.find(x=>(x['WhatsApp']||'').replace(/['"]/g,'')===whats);
+  if(!c)return;
+  const s=score(c);
+  const dias=(c['Dias Disponíveis']||c['Dias Disponiveis']||'--').split(',').map(d=>d.trim()).join(', ');
+  const perfCor={'A':'#16a34a','B':'#d97706','C':'#ea580c'}[c['Perfil']]||'#555';
+  const clog=statusLog.filter(l=>l.whats===c['WhatsApp']).slice(0,5);
+  const nota=notesStorage[whats]||'';
+  const row=(l,v)=>'<div style="background:#f9f9f9;border-radius:5px;padding:7px 10px;break-inside:avoid"><div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px">'+l+'</div><div style="font-size:12px;font-weight:500">'+(v||'--')+'</div></div>';
+  const html='<div style="font-family:Arial,sans-serif;padding:20px;color:#111;font-size:12px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #1B6B3A;padding-bottom:12px;margin-bottom:14px">'+
+    '<div style="display:flex;align-items:center;gap:12px">'+
+    '<div style="width:48px;height:48px;border-radius:10px;background:#1B6B3A;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff">'+ini(c['Nome'])+'</div>'+
+    '<div><div style="font-size:18px;font-weight:700">'+(c['Nome']||'--')+'</div>'+
+    '<div style="font-size:11px;color:#555">'+(c['WhatsApp']||'--')+' · Cadastro: '+(c['Data Cadastro']||'--')+'</div>'+
+    '<div style="font-size:11px;color:#888">Status: <b>'+getStatus(c)+'</b> · '+diasNoStatus(c)+' dias neste status</div></div></div>'+
+    '<div style="text-align:right"><div style="font-size:9px;color:#888;text-transform:uppercase">Perfil</div>'+
+    '<div style="font-size:26px;font-weight:700;color:'+perfCor+'">'+c['Perfil']+'</div>'+
+    '<div style="font-size:10px;color:#888">Score '+s+'%</div></div></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:12px">'+
+    row('Nascimento',c['Data Nascimento'])+row('Cidade',c['Cidade Interesse'])+row('CEP / Bairro',(c['CEP']||'')+(c['Bairro']?' · '+c['Bairro']:''))+
+    row('Endereco',(c['Rua']||'')+(c['Numero']||c['Número']?', '+(c['Numero']||c['Número']):''))+row('Transporte',c['Transporte'])+row('Estado Civil',c['Estado Civil'])+
+    row('Filhos',(c['Filhos']||'')+(c['Situacao dos Filhos']||c['Situação dos Filhos']?' - '+(c['Situacao dos Filhos']||c['Situação dos Filhos']):''))+row('Dias Disponiveis',dias)+row('Situacao Atual',c['Situacao Atual']||c['Situação Atual'])+
+    row('Exp. Residencias',c['Exp. Residencias']||c['Exp. Residências'])+row('Exp. Empresarial',c['Exp. Empresarial'])+row('Fumante',c['Fumante'])+
+    row('Alergia/Pet',c['Alergia/Pet'])+row('Alergia Produto',c['Alergia Produto Limp.'])+row('Remedio Controlado',c['Remedio Controlado']||c['Remédio Controlado'])+
+    row('Dor no Corpo',c['Dor no Corpo'])+row('Carteira Assinada',c['Carteira Assinada'])+row('Pref. Atendimento',c['Pref. Atendimento'])+
+    '</div>'+
+    '<div style="background:#f9f9f9;border-radius:5px;padding:8px 10px;margin-bottom:10px"><div style="font-size:9px;color:#888;text-transform:uppercase;margin-bottom:3px">Motivacao</div><div style="font-size:12px">'+(c['Motivacao']||c['Motivação']||'--')+'</div></div>'+
+    '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:7px;padding:10px;margin-bottom:10px"><div style="font-size:9px;color:#16a34a;text-transform:uppercase;margin-bottom:3px">Recomendacao de perfil</div><div style="font-size:12px;line-height:1.6">'+rec(c)+'</div></div>'+
+    (nota?'<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:10px;margin-bottom:10px"><div style="font-size:9px;color:#d97706;text-transform:uppercase;margin-bottom:3px">Anotacoes da entrevista</div><div style="font-size:12px;line-height:1.6">'+nota+'</div></div>':'')+
+    (clog.length?'<div style="margin-bottom:10px"><div style="font-size:9px;font-weight:700;color:#1B6B3A;margin-bottom:6px;text-transform:uppercase">Historico de movimentacoes</div>'+clog.map(l=>'<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #eee;font-size:11px"><span style="color:#888;min-width:120px">'+fmtDt(l.ts)+'</span><span><b>'+l.usuario+'</b>: '+l.de+' → '+l.para+'</span></div>').join('')+'</div>':'')+
+    '<div style="border-top:2px solid #eee;padding-top:12px"><div style="font-size:10px;font-weight:700;color:#1B6B3A;margin-bottom:6px">Anotacoes adicionais da entrevista</div>'+Array(6).fill('<div style="border-bottom:1px solid #ddd;height:24px;margin-bottom:6px"></div>').join('')+'</div>'+
+    '<div style="text-align:center;margin-top:12px;font-size:10px;color:#aaa">Maria Brasileira · RH Dashboard v7 · '+new Date().toLocaleString('pt-BR')+'</div></div>';
+  const pa=document.getElementById('pa');pa.innerHTML=html;pa.style.display='block';
+  window.print();setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},1000);
+}
+
+function imprimirProfissional(i){
+  const p=profissionais[i];if(!p)return;
+  const html='<div style="font-family:Arial,sans-serif;padding:24px;color:#111">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #1B6B3A;padding-bottom:12px;margin-bottom:16px">'+
+    '<div><div style="font-size:20px;font-weight:700">'+p.nome+'</div><div style="font-size:13px;color:#555">Profissional Ativa · Maria Brasileira</div></div>'+
+    '<div style="text-align:right"><div style="font-size:11px;color:#888">WhatsApp: '+(p.telefone||'--')+'</div><div style="font-size:11px;color:#888">Cidade: '+(p.cidade||'--')+'</div><div style="font-size:11px;color:#888">Ativa desde: '+(p.desde||'--')+'</div></div></div>'+
+    (p.notas?'<div style="background:#f9f9f9;border-radius:7px;padding:12px;margin-bottom:14px"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:4px">Observacoes</div><div style="font-size:12px;line-height:1.7">'+p.notas+'</div></div>':'')+
+    (p.sig?'<div style="border:1px solid #ddd;border-radius:7px;padding:12px;margin-bottom:14px;text-align:center"><div style="font-size:10px;color:#888;text-transform:uppercase;margin-bottom:8px">Assinatura Eletronica</div><img src="'+p.sig+'" style="max-height:90px"><div style="font-size:10px;color:#888;margin-top:4px">Assinado em: '+p.sigDate+'</div></div>':'')+
+    '<div style="text-align:center;margin-top:16px;font-size:10px;color:#aaa">Maria Brasileira · RH Dashboard · '+new Date().toLocaleString('pt-BR')+'</div></div>';
+  const pa=document.getElementById('pa');pa.innerHTML=html;pa.style.display='block';
+  window.print();setTimeout(()=>{pa.style.display='none';pa.innerHTML='';},800);
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════════
+function goTo(v,btn){
+  view=v;
+  document.querySelectorAll('.si').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const T={overview:'Visao Geral',lembretes:'Lembretes',aniversariantes:'Aniversariantes',candidatas:'Candidatas',triagem:'Triagem',ativas:'Profissionais Ativas',producao:'Producao RH',graficos:'Graficos',movimentacoes:'Movimentacoes',relatorios:'Relatorios'};
+  document.getElementById('ptitle').textContent=T[v]||v;
+  renderView();
+}
+function renderView(){
+  const f={overview:renderOverview,candidatas:renderCandidatas,triagem:renderTriagem,ativas:renderAtivas,lembretes:renderLembretes,aniversariantes:renderAniversariantes,producao:renderProducao,graficos:renderGraficos,movimentacoes:renderMovimentacoes,relatorios:renderRelatorios};
+  (f[view]||renderOverview)();
+}
+function closeOv(id,e){if(!e||e.target.id===id)document.getElementById(id).classList.remove('open');}
+
+// ═══════════════════════════════════════════════════════════
+// JSONP + CARREGAR
+// ═══════════════════════════════════════════════════════════
+function loadJSONP(url){
+  return new Promise((resolve,reject)=>{
+    const cb='_cb'+Date.now()+Math.floor(Math.random()*9999);
+    const s=document.createElement('script');
+    s.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+    window[cb]=d=>{try{delete window[cb];document.head.removeChild(s);}catch(e){}resolve(d);};
+    s.onerror=()=>{try{delete window[cb];document.head.removeChild(s);}catch(e){}reject(new Error('Falha ao conectar ao servidor'));};
+    document.head.appendChild(s);
+  });
+}
+
+async function carregarDados(){
+  document.getElementById('content').innerHTML='<div class="loading"><div class="spin"></div>Carregando dados da planilha...</div>';
+  try{
+    const json=await loadJSONP(SU+'?dashboard=1');
+    if(json&&Array.isArray(json.rows)){allData=json.rows;}
+    else throw new Error('Resposta invalida do servidor.');
+  }catch(e){
+    // Mesmo com erro na planilha, mostra os dados locais que já temos
+    document.getElementById('content').innerHTML=
+      '<div class="errbox">Nao foi possivel conectar a planilha.<br>'+
+      '<small>Verifique se o Apps Script esta implantado com acesso "Qualquer pessoa".<br>Erro: '+e.message+'</small><br>'+
+      '<button onclick="carregarDados()" style="background:var(--v);border:none;border-radius:8px;padding:9px 22px;color:#fff;font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif;margin-top:12px">Tentar novamente</button></div>';
+    // NÃO retorna — mantém dados locais visíveis
+    populateSelects();applyFilters();updateBadges();
+    return;
+  }
+  populateSelects();applyFilters();updateBadges();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+function configurarApiKey(){
+  const atual=localStorage.getItem('mb_api_key')||'';
+  const nova=prompt('Chave API Anthropic para analise Truora:\n(deixe vazio para remover)\n\nChave atual: '+(atual?'**** configurada':'nao configurada'));
+  if(nova===null)return;
+  if(nova.trim()){localStorage.setItem('mb_api_key',nova.trim());alert('Chave salva!');}
+  else{localStorage.removeItem('mb_api_key');alert('Chave removida.');}
+}
+
+async function init(){
+  // Carregar dados locais IMEDIATAMENTE - independente de login ou planilha
+  await initDB();
+  loadPersist();
+  updateBadges();
+
+  const logged=checkLogin();
+  if(logged) carregarDados();
+
+  setInterval(checkReminders,60000);
+  setTimeout(checkReminders,3000);
+}
+init();
+</script>
+</body>
+</html>
